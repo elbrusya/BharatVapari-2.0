@@ -1,34 +1,37 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+.gradient-bg {
+  background: linear-gradient(135deg, #4338ca 0%, #7c3aed 50%, #f59e0b 100%);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+.gradient-text {
+  background: linear-gradient(135deg, #4338ca 0%, #7c3aed 50%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+.animate-float {
+  animation: float 3s ease-in-out infinite;
 }
 
-.App-link {
-    color: #61dafb;
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+.chat-bubble {
+  max-width: 70%;
+  word-wrap: break-word;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
