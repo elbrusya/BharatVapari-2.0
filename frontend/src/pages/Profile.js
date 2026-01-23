@@ -1,0 +1,194 @@
+import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+import Navbar from '../components/Navbar';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import api from '../utils/api';
+import { toast } from 'sonner';
+import { User, Save, Briefcase, MapPin, Linkedin } from 'lucide-react';
+
+export default function Profile() {
+  const { user } = useAuth();
+  const [profile, setProfile] = useState({
+    bio: '',
+    skills: '',
+    experience: '',
+    location: '',
+    company: '',
+    linkedin: '',
+  });
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setProfile({
+        bio: user.bio || '',
+        skills: user.skills?.join(', ') || '',
+        experience: user.experience || '',
+        location: user.location || '',
+        company: user.company || '',
+        linkedin: user.linkedin || '',
+      });
+    }
+  }, [user]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const data = {
+        ...profile,
+        skills: profile.skills.split(',').map((s) => s.trim()).filter((s) => s),
+      };
+      await api.updateProfile(data);
+      toast.success('Profile updated successfully!');
+    } catch (error) {
+      toast.error('Failed to update profile');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-amber-50">
+      <Navbar />
+
+      <div className="max-w-4xl mx-auto px-6 py-12">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Outfit' }}>
+            My Profile
+          </h1>
+          <p className="text-slate-600">Complete your profile to get better opportunities</p>
+        </div>
+
+        <Card className="p-8 rounded-2xl border border-slate-200 bg-white shadow-sm">
+          {/* Profile Header */}
+          <div className="flex items-center gap-6 mb-8 pb-8 border-b border-slate-200">
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white text-4xl font-bold">
+              {user?.full_name?.charAt(0)}
+            </div>
+            <div>
+              <h2 className="text-3xl font-bold mb-1" style={{ fontFamily: 'Outfit' }}>
+                {user?.full_name}
+              </h2>
+              <p className="text-slate-600">{user?.email}</p>
+              <div className="mt-2">
+                <span className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium capitalize">
+                  {user?.role?.replace('_', ' ')}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Profile Form */}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <Label htmlFor="bio" className="text-sm font-medium">
+                Bio
+              </Label>
+              <Textarea
+                id="bio"
+                data-testid="profile-bio-input"
+                value={profile.bio}
+                onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+                rows={4}
+                placeholder="Tell us about yourself..."
+                className="mt-2 rounded-xl"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="skills" className="text-sm font-medium">
+                Skills (comma-separated)
+              </Label>
+              <Input
+                id="skills"
+                data-testid="profile-skills-input"
+                value={profile.skills}
+                onChange={(e) => setProfile({ ...profile, skills: e.target.value })}
+                placeholder="e.g., React, Python, Marketing"
+                className="mt-2 rounded-xl"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="experience" className="text-sm font-medium">
+                Experience
+              </Label>
+              <Textarea
+                id="experience"
+                data-testid="profile-experience-input"
+                value={profile.experience}
+                onChange={(e) => setProfile({ ...profile, experience: e.target.value })}
+                rows={3}
+                placeholder="Describe your work experience..."
+                className="mt-2 rounded-xl"
+              />
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="location" className="text-sm font-medium flex items-center gap-2">
+                  <MapPin className="w-4 h-4" />
+                  Location
+                </Label>
+                <Input
+                  id="location"
+                  data-testid="profile-location-input"
+                  value={profile.location}
+                  onChange={(e) => setProfile({ ...profile, location: e.target.value })}
+                  placeholder="e.g., Bangalore, India"
+                  className="mt-2 rounded-xl"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="company" className="text-sm font-medium flex items-center gap-2">
+                  <Briefcase className="w-4 h-4" />
+                  Company
+                </Label>
+                <Input
+                  id="company"
+                  data-testid="profile-company-input"
+                  value={profile.company}
+                  onChange={(e) => setProfile({ ...profile, company: e.target.value })}
+                  placeholder="Your company name"
+                  className="mt-2 rounded-xl"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="linkedin" className="text-sm font-medium flex items-center gap-2">
+                <Linkedin className="w-4 h-4" />
+                LinkedIn Profile
+              </Label>
+              <Input
+                id="linkedin"
+                data-testid="profile-linkedin-input"
+                value={profile.linkedin}
+                onChange={(e) => setProfile({ ...profile, linkedin: e.target.value })}
+                placeholder="https://linkedin.com/in/yourprofile"
+                className="mt-2 rounded-xl"
+              />
+            </div>
+
+            <Button
+              type="submit"
+              data-testid="save-profile-button"
+              disabled={loading}
+              className="w-full h-12 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
+            >
+              <Save className="w-5 h-5" />
+              {loading ? 'Saving...' : 'Save Profile'}
+            </Button>
+          </form>
+        </Card>
+      </div>
+    </div>
+  );
+}
