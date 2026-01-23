@@ -1,0 +1,152 @@
+{
+  "brand_identity": {
+    "name": "StartupConnect",
+    "core_values": ["Ambition", "Trust", "Community", "Growth"],
+    "emotional_tone": "Energetic, Professional, Approachable, Indian-Modern",
+    "archetype": "The Performance Pro (Indian Edition)"
+  },
+  "typography": {
+    "font_family": {
+      "headings": "Outfit, sans-serif",
+      "body": "Plus Jakarta Sans, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "weights": {
+      "headings": "600 (SemiBold) or 700 (Bold)",
+      "body": "400 (Regular) or 500 (Medium)"
+    },
+    "scale": {
+      "h1": "text-5xl md:text-7xl tracking-tight font-bold",
+      "h2": "text-4xl md:text-5xl tracking-tight font-semibold",
+      "h3": "text-2xl md:text-3xl font-semibold",
+      "body_lg": "text-lg leading-relaxed",
+      "body_base": "text-base leading-relaxed",
+      "caption": "text-sm text-muted-foreground uppercase tracking-wider"
+    },
+    "installation": "Import from Google Fonts: https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+  },
+  "colors": {
+    "palette": {
+      "primary": {
+        "DEFAULT": "#4338ca",
+        "foreground": "#ffffff",
+        "description": "Indigo 700 - Trust & Professionalism"
+      },
+      "secondary": {
+        "DEFAULT": "#f59e0b",
+        "foreground": "#0f172a",
+        "description": "Amber 500 - Energy & Startup Spirit (Saffron-inspired)"
+      },
+      "accent": {
+        "DEFAULT": "#0d9488",
+        "foreground": "#ffffff",
+        "description": "Teal 600 - Growth & Mentorship"
+      },
+      "background": {
+        "light": "#fafaf9",
+        "dark": "#020617",
+        "description": "Warm Stone (Light) / Deep Void (Dark)"
+      },
+      "surface": {
+        "light": "#ffffff",
+        "dark": "#0f172a"
+      },
+      "muted": {
+        "DEFAULT": "#f1f5f9",
+        "foreground": "#64748b"
+      }
+    },
+    "gradients": {
+      "hero": "bg-gradient-to-br from-indigo-600 via-purple-600 to-amber-500",
+      "card_hover": "hover:bg-gradient-to-br hover:from-white hover:to-indigo-50/50 dark:hover:from-slate-900 dark:hover:to-indigo-950/30"
+    }
+  },
+  "layout_strategies": {
+    "spacing": {
+      "container_padding": "p-6 md:p-12 lg:p-16",
+      "section_gap": "gap-12 md:gap-24",
+      "element_gap": "gap-4 md:gap-6"
+    },
+    "grids": {
+      "bento_marketing": "grid grid-cols-1 md:grid-cols-12 gap-6",
+      "dashboard_dense": "grid grid-cols-1 md:grid-cols-4 gap-4",
+      "card_grid": "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+    },
+    "containers": {
+      "marketing": "max-w-7xl mx-auto",
+      "dashboard": "w-full px-4 md:px-8"
+    }
+  },
+  "component_rules": {
+    "buttons": {
+      "primary": "rounded-full px-8 py-6 font-semibold shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5",
+      "secondary": "rounded-full px-8 py-6 border-2 border-indigo-100 hover:bg-indigo-50 text-indigo-700 font-medium",
+      "ghost": "hover:bg-indigo-50/50 text-indigo-600 hover:text-indigo-700"
+    },
+    "cards": {
+      "style": "rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300",
+      "highlight": "border-l-4 border-l-amber-500"
+    },
+    "inputs": {
+      "style": "rounded-xl border-slate-200 bg-slate-50/50 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all h-12"
+    },
+    "chat_interface": {
+      "style": "WhatsApp-inspired familiarity but cleaner. Bubble-style messages. Green/Teal for sent messages, White/Gray for received."
+    }
+  },
+  "visual_enhancers": {
+    "glassmorphism": "backdrop-blur-xl bg-white/70 dark:bg-slate-900/70 border border-white/20 shadow-lg",
+    "noise_texture": "opacity-20 pointer-events-none fixed inset-0 z-50 mix-blend-overlay",
+    "borders": "1px solid rgba(0,0,0,0.08) dark:rgba(255,255,255,0.08)"
+  },
+  "image_urls": {
+    "hero_section": {
+      "url": "https://images.unsplash.com/photo-1734519614079-f8ac6ac540bd",
+      "alt": "Diverse Indian startup team collaborating",
+      "usage": "Main hero background or split-screen visual"
+    },
+    "mentorship_feature": {
+      "url": "https://images.unsplash.com/photo-1591062182630-2cae7655ed1b",
+      "alt": "One-on-one mentorship session",
+      "usage": "Mentorship portal landing section"
+    },
+    "hiring_feature": {
+      "url": "https://images.pexels.com/photos/3153207/pexels-photo-3153207.jpeg",
+      "alt": "Team working in modern office",
+      "usage": "Hiring portal landing section"
+    },
+    "community_section": {
+      "url": "https://images.unsplash.com/photo-1666718622537-6748ca5322e2",
+      "alt": "Modern Indian office space",
+      "usage": "Community or About Us background"
+    }
+  },
+  "instructions_to_main_agent": {
+    "general": "Build a high-energy, trustworthy platform. Avoid generic 'SaaS Blue' templates. Use the Saffron/Amber accents to give it an Indian startup identity without being cliché.",
+    "theme_setup": "Implement a 'ThemeToggle' but default to Light Mode with the 'Warm Stone' background. Dark mode should be deep navy/slate, not pure black.",
+    "navigation": "Create a distinct separation between 'Hiring' and 'Mentorship' portals in the nav. Maybe a toggle switch at the top level.",
+    "chat": "The chat interface is critical. Make it feel instant and familiar (like WhatsApp/Telegram web). Use full width on mobile.",
+    "dashboard": "Role-based dashboards are key. Startup Dashboard = Analytics heavy. Job Seeker = Feed/List heavy. Mentor = Calendar/Request heavy.",
+    "animations": "Use 'framer-motion' for page transitions. Stagger list items in job feeds. Smooth hover effects on all interactive elements."
+  },
+  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
+    "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients",
+    "Don't make generic centered layouts, simplistic gradients, and uniform styling.",
+    "Create depth through layered design elements with z-index hierarchy",
+    "Use glass-morphism effects with backdrop filters (12-24px blur)",
+    "You MUST NOT apply universal transition. Eg: `transition: all`. This results in breaking transforms. Always add transitions for specific interactive elements like button, input excluding transforms",
+    "You MUST NOT center align the app container, ie do not add `.App { text-align: center; }` in the css file. This disrupts the human natural reading flow of text",
+    "Always use modern button styles like pill-shaped, or sharp button with interaction animations & color relevant to the app style",
+    "NEVER: use AI assistant Emoji characters like 🤖🧠💭💡🔮🎯📚🎭🎬🎪🎉🎊🎁🎀🎂🍰🎈🎨🎰💰💵💳🏦💎🪙💸🤑📊📈📉💹🔢🏆🥇 etc for icons.",
+    "Every interaction needs micro-animations - hover states, transitions, parallax effects, and entrance animations. Static = dead.",
+    "Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.",
+    "Subtle grain textures, noise overlays, custom cursors, selection states, and loading animations: separates good from extraordinary.",
+    "Main agent relies on these image URLs. Missing categories (especially sponsor logos) = main agent will use placeholder text which is FORBIDDEN",
+    "Prioritize using pre-existing components from src/components/ui when applicable",
+    "Create new components that match the style and conventions of existing components when needed",
+    "Examine existing components to understand the project's component patterns before creating new ones",
+    "Components MUST use named exports (export const ComponentName = ...)",
+    "Pages MUST use default exports (export default function PageName() {...})",
+    "Use `sonner` for toasts. Sonner component are located in `/app/src/components/ui/sonner.tsx`"
+  ]
+}
