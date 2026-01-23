@@ -1,15 +1,19 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, status, File, UploadFile
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
 from pathlib import Path
-from pydantic import BaseModel, Field, ConfigDict
-from typing import List
+from pydantic import BaseModel, Field, ConfigDict, EmailStr
+from typing import List, Optional
 import uuid
-from datetime import datetime, timezone
-
+from datetime import datetime, timezone, timedelta
+import jwt
+import bcrypt
+from emergentintegrations.llm.chat import LlmChat, UserMessage
+import razorpay
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -19,54 +23,417 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-# Create the main app without a prefix
-app = FastAPI()
+# Security
+security = HTTPBearer()
+JWT_SECRET = os.environ.get('JWT_SECRET_KEY', 'your-secret-key')
+ALGORITHM = "HS256"
 
-# Create a router with the /api prefix
+# Razorpay Client
+razorpay_client = razorpay.Client(auth=(os.environ.get('RAZORPAY_KEY_ID'), os.environ.get('RAZORPAY_KEY_SECRET')))
+
+app = FastAPI()
 api_router = APIRouter(prefix="/api")
 
-
-# Define Models
-class StatusCheck(BaseModel):
-    model_config = ConfigDict(extra="ignore")  # Ignore MongoDB's _id field
+# Auth Models
+class UserRegister(BaseModel):
+    email: EmailStr
+    password: str
+    full_name: str
+    role: str  # startup, job_seeker, mentor, mentee
     
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+class User(BaseModel):
+    model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    client_name: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    email: str
+    full_name: str
+    role: str
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    profile_complete: bool = False
 
-class StatusCheckCreate(BaseModel):
-    client_name: str
-
-# Add your routes to the router instead of directly to app
-@api_router.get("/")
-async def root():
-    return {"message": "Hello World"}
-
-@api_router.post("/status", response_model=StatusCheck)
-async def create_status_check(input: StatusCheckCreate):
-    status_dict = input.model_dump()
-    status_obj = StatusCheck(**status_dict)
+# Profile Models
+class UserProfile(BaseModel):
+    bio: Optional[str] = None
+    skills: Optional[List[str]] = []
+    experience: Optional[str] = None
+    location: Optional[str] = None
+    company: Optional[str] = None
+    linkedin: Optional[str] = None
     
-    # Convert to dict and serialize datetime to ISO string for MongoDB
-    doc = status_obj.model_dump()
-    doc['timestamp'] = doc['timestamp'].isoformat()
-    
-    _ = await db.status_checks.insert_one(doc)
-    return status_obj
+# Job Models
+class Job(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    company: str
+    description: str
+    requirements: List[str]
+    location: str
+    job_type: str  # full-time, part-time, contract
+    salary_range: Optional[str] = None
+    posted_by: str  # user_id
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    status: str = "active"
 
-@api_router.get("/status", response_model=List[StatusCheck])
-async def get_status_checks():
-    # Exclude MongoDB's _id field from the query results
-    status_checks = await db.status_checks.find({}, {"_id": 0}).to_list(1000)
-    
-    # Convert ISO string timestamps back to datetime objects
-    for check in status_checks:
-        if isinstance(check['timestamp'], str):
-            check['timestamp'] = datetime.fromisoformat(check['timestamp'])
-    
-    return status_checks
+class JobCreate(BaseModel):
+    title: str
+    company: str
+    description: str
+    requirements: List[str]
+    location: str
+    job_type: str
+    salary_range: Optional[str] = None
 
-# Include the router in the main app
+# Application Models
+class Application(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    job_id: str
+    applicant_id: str
+    cover_letter: str
+    status: str = "pending"  # pending, reviewing, accepted, rejected
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+class ApplicationCreate(BaseModel):
+    job_id: str
+    cover_letter: str
+
+# Mentor Models
+class MentorProfile(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    user_id: str
+    expertise: List[str]
+    bio: str
+    experience_years: int
+    hourly_rate: Optional[float] = None
+    availability: List[str]  # days of week
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+class MentorProfileCreate(BaseModel):
+    expertise: List[str]
+    bio: str
+    experience_years: int
+    hourly_rate: Optional[float] = None
+    availability: List[str]
+
+# Session Models
+class SessionBooking(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    mentor_id: str
+    mentee_id: str
+    session_date: str
+    duration: int  # minutes
+    topic: str
+    status: str = "pending"  # pending, confirmed, completed, cancelled
+    payment_status: str = "unpaid"
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+class SessionBookingCreate(BaseModel):
+    mentor_id: str
+    session_date: str
+    duration: int
+    topic: str
+
+# Message Models
+class Message(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    sender_id: str
+    receiver_id: str
+    content: str
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+    read: bool = False
+
+class MessageCreate(BaseModel):
+    receiver_id: str
+    content: str
+
+# Payment Models
+class PaymentOrderCreate(BaseModel):
+    amount: int  # in paise
+    session_id: str
+
+# Helper Functions
+def create_token(user_id: str, email: str, role: str) -> str:
+    payload = {
+        "user_id": user_id,
+        "email": email,
+        "role": role,
+        "exp": datetime.now(timezone.utc) + timedelta(days=7)
+    }
+    return jwt.encode(payload, JWT_SECRET, algorithm=ALGORITHM)
+
+def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    try:
+        payload = jwt.decode(credentials.credentials, JWT_SECRET, algorithms=[ALGORITHM])
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+# Auth Routes
+@api_router.post("/auth/register")
+async def register(user: UserRegister):
+    existing = await db.users.find_one({"email": user.email}, {"_id": 0})
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    hashed = bcrypt.hashpw(user.password.encode(), bcrypt.gensalt())
+    user_obj = User(
+        email=user.email,
+        full_name=user.full_name,
+        role=user.role
+    )
+    
+    doc = user_obj.model_dump()
+    doc['password'] = hashed.decode()
+    await db.users.insert_one(doc)
+    
+    token = create_token(user_obj.id, user_obj.email, user_obj.role)
+    return {"token": token, "user": user_obj}
+
+@api_router.post("/auth/login")
+async def login(credentials: UserLogin):
+    user = await db.users.find_one({"email": credentials.email}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    if not bcrypt.checkpw(credentials.password.encode(), user['password'].encode()):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    token = create_token(user['id'], user['email'], user['role'])
+    user.pop('password')
+    return {"token": token, "user": user}
+
+@api_router.get("/auth/me")
+async def get_current_user(payload: dict = Depends(verify_token)):
+    user = await db.users.find_one({"id": payload['user_id']}, {"_id": 0, "password": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+# Profile Routes
+@api_router.put("/profile")
+async def update_profile(profile: UserProfile, payload: dict = Depends(verify_token)):
+    await db.users.update_one(
+        {"id": payload['user_id']},
+        {"$set": {**profile.model_dump(), "profile_complete": True}}
+    )
+    return {"message": "Profile updated successfully"}
+
+@api_router.get("/profile/{user_id}")
+async def get_user_profile(user_id: str):
+    user = await db.users.find_one({"id": user_id}, {"_id": 0, "password": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+# Job Routes
+@api_router.post("/jobs", response_model=Job)
+async def create_job(job: JobCreate, payload: dict = Depends(verify_token)):
+    if payload['role'] != 'startup':
+        raise HTTPException(status_code=403, detail="Only startups can post jobs")
+    
+    job_obj = Job(**job.model_dump(), posted_by=payload['user_id'])
+    await db.jobs.insert_one(job_obj.model_dump())
+    return job_obj
+
+@api_router.get("/jobs", response_model=List[Job])
+async def get_jobs(skip: int = 0, limit: int = 20):
+    jobs = await db.jobs.find({"status": "active"}, {"_id": 0}).skip(skip).limit(limit).to_list(limit)
+    return jobs
+
+@api_router.get("/jobs/{job_id}", response_model=Job)
+async def get_job(job_id: str):
+    job = await db.jobs.find_one({"id": job_id}, {"_id": 0})
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    return job
+
+@api_router.get("/jobs/my/posted", response_model=List[Job])
+async def get_my_jobs(payload: dict = Depends(verify_token)):
+    jobs = await db.jobs.find({"posted_by": payload['user_id']}, {"_id": 0}).to_list(100)
+    return jobs
+
+# Application Routes
+@api_router.post("/applications", response_model=Application)
+async def apply_job(application: ApplicationCreate, payload: dict = Depends(verify_token)):
+    existing = await db.applications.find_one({
+        "job_id": application.job_id,
+        "applicant_id": payload['user_id']
+    }, {"_id": 0})
+    
+    if existing:
+        raise HTTPException(status_code=400, detail="Already applied to this job")
+    
+    app_obj = Application(**application.model_dump(), applicant_id=payload['user_id'])
+    await db.applications.insert_one(app_obj.model_dump())
+    return app_obj
+
+@api_router.get("/applications/my", response_model=List[Application])
+async def get_my_applications(payload: dict = Depends(verify_token)):
+    applications = await db.applications.find({"applicant_id": payload['user_id']}, {"_id": 0}).to_list(100)
+    return applications
+
+@api_router.get("/applications/job/{job_id}", response_model=List[Application])
+async def get_job_applications(job_id: str, payload: dict = Depends(verify_token)):
+    job = await db.jobs.find_one({"id": job_id, "posted_by": payload['user_id']}, {"_id": 0})
+    if not job:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    applications = await db.applications.find({"job_id": job_id}, {"_id": 0}).to_list(100)
+    return applications
+
+# Mentor Routes
+@api_router.post("/mentors/profile")
+async def create_mentor_profile(profile: MentorProfileCreate, payload: dict = Depends(verify_token)):
+    if payload['role'] != 'mentor':
+        raise HTTPException(status_code=403, detail="Only mentors can create mentor profiles")
+    
+    existing = await db.mentor_profiles.find_one({"user_id": payload['user_id']}, {"_id": 0})
+    if existing:
+        await db.mentor_profiles.update_one(
+            {"user_id": payload['user_id']},
+            {"$set": profile.model_dump()}
+        )
+        return {"message": "Profile updated"}
+    
+    mentor_obj = MentorProfile(**profile.model_dump(), user_id=payload['user_id'])
+    await db.mentor_profiles.insert_one(mentor_obj.model_dump())
+    return {"message": "Profile created"}
+
+@api_router.get("/mentors")
+async def get_mentors(skip: int = 0, limit: int = 20):
+    mentors = await db.mentor_profiles.find({}, {"_id": 0}).skip(skip).limit(limit).to_list(limit)
+    
+    # Fetch user details for each mentor
+    for mentor in mentors:
+        user = await db.users.find_one({"id": mentor['user_id']}, {"_id": 0, "password": 0})
+        mentor['user'] = user
+    
+    return mentors
+
+@api_router.get("/mentors/{mentor_id}")
+async def get_mentor_profile(mentor_id: str):
+    mentor = await db.mentor_profiles.find_one({"user_id": mentor_id}, {"_id": 0})
+    if not mentor:
+        raise HTTPException(status_code=404, detail="Mentor not found")
+    
+    user = await db.users.find_one({"id": mentor_id}, {"_id": 0, "password": 0})
+    mentor['user'] = user
+    return mentor
+
+# Session Routes
+@api_router.post("/sessions", response_model=SessionBooking)
+async def book_session(session: SessionBookingCreate, payload: dict = Depends(verify_token)):
+    session_obj = SessionBooking(**session.model_dump(), mentee_id=payload['user_id'])
+    await db.sessions.insert_one(session_obj.model_dump())
+    return session_obj
+
+@api_router.get("/sessions/my", response_model=List[SessionBooking])
+async def get_my_sessions(payload: dict = Depends(verify_token)):
+    if payload['role'] == 'mentor':
+        sessions = await db.sessions.find({"mentor_id": payload['user_id']}, {"_id": 0}).to_list(100)
+    else:
+        sessions = await db.sessions.find({"mentee_id": payload['user_id']}, {"_id": 0}).to_list(100)
+    return sessions
+
+# Message Routes
+@api_router.post("/messages", response_model=Message)
+async def send_message(message: MessageCreate, payload: dict = Depends(verify_token)):
+    msg_obj = Message(**message.model_dump(), sender_id=payload['user_id'])
+    await db.messages.insert_one(msg_obj.model_dump())
+    return msg_obj
+
+@api_router.get("/messages/{user_id}", response_model=List[Message])
+async def get_conversation(user_id: str, payload: dict = Depends(verify_token)):
+    messages = await db.messages.find({
+        "$or": [
+            {"sender_id": payload['user_id'], "receiver_id": user_id},
+            {"sender_id": user_id, "receiver_id": payload['user_id']}
+        ]
+    }, {"_id": 0}).sort("created_at", 1).to_list(500)
+    return messages
+
+@api_router.get("/messages/conversations/list")
+async def get_conversations(payload: dict = Depends(verify_token)):
+    messages = await db.messages.find({
+        "$or": [{"sender_id": payload['user_id']}, {"receiver_id": payload['user_id']}]
+    }, {"_id": 0}).to_list(1000)
+    
+    # Get unique user IDs
+    user_ids = set()
+    for msg in messages:
+        if msg['sender_id'] != payload['user_id']:
+            user_ids.add(msg['sender_id'])
+        if msg['receiver_id'] != payload['user_id']:
+            user_ids.add(msg['receiver_id'])
+    
+    # Fetch user details
+    conversations = []
+    for user_id in user_ids:
+        user = await db.users.find_one({"id": user_id}, {"_id": 0, "password": 0})
+        if user:
+            # Get last message
+            last_msg = await db.messages.find_one({
+                "$or": [
+                    {"sender_id": payload['user_id'], "receiver_id": user_id},
+                    {"sender_id": user_id, "receiver_id": payload['user_id']}
+                ]
+            }, {"_id": 0}, sort=[("created_at", -1)])
+            conversations.append({"user": user, "last_message": last_msg})
+    
+    return conversations
+
+# AI Matching Route
+@api_router.post("/ai/match-jobs")
+async def match_jobs(payload: dict = Depends(verify_token)):
+    user = await db.users.find_one({"id": payload['user_id']}, {"_id": 0, "password": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    jobs = await db.jobs.find({"status": "active"}, {"_id": 0}).limit(10).to_list(10)
+    
+    # Use AI to match jobs
+    chat = LlmChat(
+        api_key=os.environ.get('EMERGENT_LLM_KEY'),
+        session_id=f"match_{user['id']}",
+        system_message="You are a job matching AI. Analyze user profile and recommend best matching jobs."
+    ).with_model("openai", "gpt-5.2")
+    
+    user_info = f"User: {user.get('full_name')}, Skills: {user.get('skills', [])}, Experience: {user.get('experience', 'Not specified')}"
+    jobs_info = "\n".join([f"Job {i+1}: {job['title']} at {job['company']} - {job['description'][:100]}" for i, job in enumerate(jobs)])
+    
+    message = UserMessage(text=f"{user_info}\n\nAvailable Jobs:\n{jobs_info}\n\nRecommend top 3 jobs and explain why.")
+    response = await chat.send_message(message)
+    
+    return {"recommendations": response, "jobs": jobs}
+
+# Payment Routes
+@api_router.post("/payments/create-order")
+async def create_payment_order(order: PaymentOrderCreate, payload: dict = Depends(verify_token)):
+    razor_order = razorpay_client.order.create({
+        "amount": order.amount,
+        "currency": "INR",
+        "payment_capture": 1
+    })
+    
+    await db.payments.insert_one({
+        "order_id": razor_order["id"],
+        "session_id": order.session_id,
+        "user_id": payload['user_id'],
+        "amount": order.amount,
+        "status": "created",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    })
+    
+    return razor_order
+
 app.include_router(api_router)
 
 app.add_middleware(
@@ -77,7 +444,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
