@@ -298,7 +298,7 @@ export default function Profile() {
                           name="company_registered"
                           data-testid="company-registered-no"
                           checked={profile.company_registered === false}
-                          onChange={() => setProfile({ ...profile, company_registered: false })}
+                          onChange={() => setProfile({ ...profile, company_registered: false, registration_number: '' })}
                           required
                           className="w-4 h-4"
                         />
@@ -330,7 +330,7 @@ export default function Profile() {
                           name="has_gst"
                           data-testid="has-gst-no"
                           checked={profile.has_gst === false}
-                          onChange={() => setProfile({ ...profile, has_gst: false })}
+                          onChange={() => setProfile({ ...profile, has_gst: false, gst_number: '' })}
                           required
                           className="w-4 h-4"
                         />
@@ -339,6 +339,48 @@ export default function Profile() {
                     </div>
                   </div>
                 </div>
+
+                {/* Conditional: Registration Number */}
+                {profile.company_registered === true && (
+                  <div className="animate-in slide-in-from-top-2 duration-300">
+                    <Label htmlFor="registration_number" className="text-sm font-medium">
+                      Company Registration Number <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="registration_number"
+                      data-testid="registration-number-input"
+                      value={profile.registration_number}
+                      onChange={(e) => setProfile({ ...profile, registration_number: e.target.value })}
+                      required
+                      placeholder="e.g., U72900DL2020PTC123456"
+                      className="mt-2 rounded-xl"
+                    />
+                    <p className="text-xs text-slate-500 mt-1">
+                      Enter your CIN or company registration number
+                    </p>
+                  </div>
+                )}
+
+                {/* Conditional: GST Number */}
+                {profile.has_gst === true && (
+                  <div className="animate-in slide-in-from-top-2 duration-300">
+                    <Label htmlFor="gst_number" className="text-sm font-medium">
+                      GST Number <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="gst_number"
+                      data-testid="gst-number-input"
+                      value={profile.gst_number}
+                      onChange={(e) => setProfile({ ...profile, gst_number: e.target.value })}
+                      required
+                      placeholder="e.g., 27AABCU9603R1ZM"
+                      className="mt-2 rounded-xl"
+                    />
+                    <p className="text-xs text-slate-500 mt-1">
+                      Enter your 15-digit GST identification number
+                    </p>
+                  </div>
+                )}
 
                 <div>
                   <Label htmlFor="about_founder" className="text-sm font-medium">
