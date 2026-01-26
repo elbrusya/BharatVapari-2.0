@@ -61,6 +61,16 @@ class AdminCreate(BaseModel):
     password: str
     full_name: str
 
+class AdminRequest(BaseModel):
+    email: EmailStr
+    full_name: str
+    reason: str  # Why they need admin access
+
+class AdminRequestApproval(BaseModel):
+    request_id: str
+    approved: bool
+    password: Optional[str] = None  # Temporary password for approved admin
+
 class PasswordResetRequest(BaseModel):
     email: EmailStr
 
