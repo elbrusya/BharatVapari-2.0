@@ -173,11 +173,18 @@ export default function Auth() {
                 data-testid="auth-email-input"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={handleEmailChange}
                 required
-                className="mt-2 h-12 rounded-xl border-slate-200 bg-slate-50/50 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                className={`mt-2 h-12 rounded-xl border-slate-200 bg-slate-50/50 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all ${
+                  emailError ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''
+                }`}
                 placeholder="you@example.com"
               />
+              {emailError && (
+                <p className="text-red-600 text-sm mt-1 flex items-center gap-1">
+                  <span>⚠</span> {emailError}
+                </p>
+              )}
             </div>
 
             <div>
@@ -189,11 +196,38 @@ export default function Auth() {
                 data-testid="auth-password-input"
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={handlePasswordChange}
                 required
-                className="mt-2 h-12 rounded-xl border-slate-200 bg-slate-50/50 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                className={`mt-2 h-12 rounded-xl border-slate-200 bg-slate-50/50 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all ${
+                  passwordError ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''
+                }`}
                 placeholder="••••••••"
               />
+              {passwordError && (
+                <p className="text-red-600 text-sm mt-1 flex items-center gap-1">
+                  <span>⚠</span> {passwordError}
+                </p>
+              )}
+              {!isLogin && !passwordError && password && (
+                <div className="mt-2 space-y-1">
+                  <p className="text-xs text-slate-600">Password must contain:</p>
+                  <ul className="text-xs text-slate-600 space-y-0.5">
+                    <li className={password.length >= 8 ? 'text-green-600' : ''}>
+                      ✓ At least 8 characters
+                    </li>
+                    <li className={/[A-Z]/.test(password) ? 'text-green-600' : ''}>
+                      ✓ One uppercase letter
+                    </li>
+                    <li className={/[a-z]/.test(password) ? 'text-green-600' : ''}>
+                      ✓ One lowercase letter
+                    </li>
+                    <li className={/\d/.test(password) ? 'text-green-600' : ''}>✓ One number</li>
+                    <li className={/[!@#$%^&*(),.?":{}|<>]/.test(password) ? 'text-green-600' : ''}>
+                      ✓ One special character
+                    </li>
+                  </ul>
+                </div>
+              )}
             </div>
 
             {!isLogin && (
