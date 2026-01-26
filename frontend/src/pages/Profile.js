@@ -38,7 +38,9 @@ export default function Profile() {
     // Startup fields
     company: '',
     company_registered: null,
+    registration_number: '',
     has_gst: null,
+    gst_number: '',
     about_founder: '',
     team_size: '',
     // Mentor fields
@@ -58,7 +60,9 @@ export default function Profile() {
         education: user.education || '',
         company: user.company || '',
         company_registered: user.company_registered ?? null,
+        registration_number: user.registration_number || '',
         has_gst: user.has_gst ?? null,
+        gst_number: user.gst_number || '',
         about_founder: user.about_founder || '',
         team_size: user.team_size || '',
         experience: user.experience || '',
