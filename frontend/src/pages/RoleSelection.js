@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Briefcase, Users, GraduationCap, Building, Sparkles } from 'lucide-react';
@@ -10,6 +11,7 @@ const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export default function RoleSelection({ sessionId, userData }) {
   const navigate = useNavigate();
+  const { setUser } = useAuth();
   const [selectedRole, setSelectedRole] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -66,14 +68,20 @@ export default function RoleSelection({ sessionId, userData }) {
       );
 
       if (response.data.success) {
+        // Update auth context with user data
+        setUser(response.data.user);
         localStorage.setItem('user', JSON.stringify(response.data.user));
-        toast.success(`Welcome to BharatVapari as a ${roles.find(r => r.value === selectedRole)?.label}!`);
-        navigate('/dashboard', { replace: true });
+        
+        const roleName = roles.find(r => r.value === selectedRole)?.label;
+        toast.success(`Welcome to BharatVapari as a ${roleName}!`);
+        
+        // Force reload to ensure auth context is updated
+        window.location.href = '/dashboard';
       }
     } catch (error) {
       console.error('Role selection error:', error);
-      toast.error('Failed to complete registration');
-      navigate('/auth');
+      toast.error(error.response?.data?.detail || 'Failed to complete registration');
+      window.location.href = '/auth';
     } finally {
       setLoading(false);
     }
