@@ -262,6 +262,114 @@ async def get_current_user(payload: dict = Depends(verify_token)):
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
+@api_router.post("/auth/forgot-password")
+async def forgot_password(request: PasswordResetRequest):
+    # Validate email format
+    if '@' not in request.email or '.' not in request.email.split('@')[1]:
+        raise HTTPException(status_code=400, detail="Invalid email format")
+    
+    user = await db.users.find_one({"email": request.email}, {"_id": 0})
+    if not user:
+        # For security, don't reveal if email exists
+        return {"message": "If your email is registered, you will receive a password reset code"}
+    
+    # Generate 6-digit reset code
+    import random
+    reset_code = ''.join([str(random.randint(0, 9)) for _ in range(6)])
+    
+    # Store reset code with expiration (10 minutes)
+    reset_doc = {
+        "email": request.email,
+        "reset_code": reset_code,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "expires_at": (datetime.now(timezone.utc) + timedelta(minutes=10)).isoformat()
+    }
+    
+    # Delete any existing reset codes for this email
+    await db.password_resets.delete_many({"email": request.email})
+    await db.password_resets.insert_one(reset_doc)
+    
+    # In production, send email with reset code
+    # For demo, return the code (DO NOT DO THIS IN PRODUCTION)
+    return {
+        "message": "Password reset code generated",
+        "reset_code": reset_code,
+        "note": "In production, this code would be sent to your email"
+    }
+
+@api_router.post("/auth/reset-password")
+async def reset_password(reset: PasswordReset):
+    # Validate email format
+    if '@' not in reset.email or '.' not in reset.email.split('@')[1]:
+        raise HTTPException(status_code=400, detail="Invalid email format")
+    
+    # Validate new password strength
+    is_valid, error_msg = validate_password_strength(reset.new_password)
+    if not is_valid:
+        raise HTTPException(status_code=400, detail=error_msg)
+    
+    # Find reset code
+    reset_doc = await db.password_resets.find_one({
+        "email": reset.email,
+        "reset_code": reset.reset_code
+    }, {"_id": 0})
+    
+    if not reset_doc:
+        raise HTTPException(status_code=400, detail="Invalid reset code")
+    
+    # Check if expired
+    expires_at = datetime.fromisoformat(reset_doc['expires_at'])
+    if datetime.now(timezone.utc) > expires_at:
+        await db.password_resets.delete_one({"email": reset.email})
+        raise HTTPException(status_code=400, detail="Reset code has expired. Please request a new one")
+    
+    # Update password
+    hashed = bcrypt.hashpw(reset.new_password.encode(), bcrypt.gensalt())
+    await db.users.update_one(
+        {"email": reset.email},
+        {"$set": {"password": hashed.decode()}}
+    )
+    
+    # Delete used reset code
+    await db.password_resets.delete_one({"email": reset.email})
+    
+    return {"message": "Password reset successfully. You can now login with your new password"}
+
+@api_router.post("/auth/find-email")
+async def find_email(full_name: str):
+    """Help users find their email by full name"""
+    if not full_name or len(full_name) < 2:
+        raise HTTPException(status_code=400, detail="Please provide your full name")
+    
+    # Find users with similar name (case-insensitive partial match)
+    users = await db.users.find(
+        {"full_name": {"$regex": full_name, "$options": "i"}},
+        {"_id": 0, "email": 1, "full_name": 1}
+    ).limit(5).to_list(5)
+    
+    if not users:
+        return {"message": "No accounts found with that name", "emails": []}
+    
+    # Mask emails for privacy (show first 2 chars and domain)
+    masked_emails = []
+    for user in users:
+        email = user['email']
+        parts = email.split('@')
+        if len(parts[0]) > 2:
+            masked = f"{parts[0][:2]}***@{parts[1]}"
+        else:
+            masked = f"{parts[0][0]}***@{parts[1]}"
+        masked_emails.append({
+            "name": user['full_name'],
+            "email": masked,
+            "hint": f"Email starts with '{parts[0][:2]}'"
+        })
+    
+    return {
+        "message": f"Found {len(masked_emails)} account(s) matching your name",
+        "accounts": masked_emails
+    }
+
 # Profile Routes
 @api_router.put("/profile")
 async def update_profile(profile: UserProfile, payload: dict = Depends(verify_token)):
