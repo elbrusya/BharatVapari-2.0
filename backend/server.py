@@ -202,6 +202,16 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
 # Auth Routes
 @api_router.post("/auth/register")
 async def register(user: UserRegister):
+    # Validate email format (Pydantic EmailStr already does basic validation)
+    # Additional check to ensure it's not a simple string like "abc"
+    if '@' not in user.email or '.' not in user.email.split('@')[1]:
+        raise HTTPException(status_code=400, detail="Invalid email format. Please enter a valid email address")
+    
+    # Validate password strength
+    is_valid, error_msg = validate_password_strength(user.password)
+    if not is_valid:
+        raise HTTPException(status_code=400, detail=error_msg)
+    
     existing = await db.users.find_one({"email": user.email}, {"_id": 0})
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -222,12 +232,16 @@ async def register(user: UserRegister):
 
 @api_router.post("/auth/login")
 async def login(credentials: UserLogin):
+    # Validate email format
+    if '@' not in credentials.email or '.' not in credentials.email.split('@')[1]:
+        raise HTTPException(status_code=400, detail="Invalid email format. Please enter a valid email address")
+    
     user = await db.users.find_one({"email": credentials.email}, {"_id": 0})
     if not user:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+        raise HTTPException(status_code=401, detail="Invalid email or password")
     
     if not bcrypt.checkpw(credentials.password.encode(), user['password'].encode()):
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+        raise HTTPException(status_code=401, detail="Invalid email or password")
     
     token = create_token(user['id'], user['email'], user['role'])
     user.pop('password')
