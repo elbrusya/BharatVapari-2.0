@@ -172,7 +172,7 @@ export default function Landing() {
               data-testid="cta-join-button"
               className="rounded-full px-10 py-7 bg-white hover:bg-slate-100 text-indigo-600 font-bold shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all text-lg"
             >
-              Join StartupConnect
+              Join BharatVapari
             </Button>
           </Link>
         </div>
