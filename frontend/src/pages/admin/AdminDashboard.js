@@ -48,15 +48,17 @@ export default function AdminDashboard() {
 
   const fetchData = async () => {
     try {
-      const [statsRes, usersRes, jobsRes] = await Promise.all([
+      const [statsRes, usersRes, jobsRes, requestsRes] = await Promise.all([
         axios.get(`${API}/admin/stats`),
         axios.get(`${API}/admin/users?limit=100`),
         axios.get(`${API}/admin/jobs?limit=50`),
+        axios.get(`${API}/admin/requests`),
       ]);
 
       setStats(statsRes.data);
       setUsers(usersRes.data.users);
       setJobs(jobsRes.data.jobs);
+      setAdminRequests(requestsRes.data.requests);
     } catch (error) {
       toast.error('Failed to load admin data');
       if (error.response?.status === 403 || error.response?.status === 401) {
