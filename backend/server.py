@@ -539,6 +539,208 @@ async def logout(request: Request, response: Response, authorization: str = Head
     
     return {"message": "Logged out successfully"}
 
+# Admin Routes
+@api_router.post("/admin/login")
+async def admin_login(credentials: AdminLogin):
+    """Admin login - only for pre-configured admin accounts"""
+    # Validate email format
+    if '@' not in credentials.email or '.' not in credentials.email.split('@')[1]:
+        raise HTTPException(status_code=400, detail="Invalid email format")
+    
+    # Find admin user
+    admin = await db.users.find_one({"email": credentials.email, "role": "admin"}, {"_id": 0})
+    if not admin:
+        raise HTTPException(status_code=401, detail="Invalid admin credentials")
+    
+    # Verify password
+    if not bcrypt.checkpw(credentials.password.encode(), admin['password'].encode()):
+        raise HTTPException(status_code=401, detail="Invalid admin credentials")
+    
+    # Create token
+    token = create_token(admin['id'], admin['email'], admin['role'])
+    admin.pop('password')
+    return {"token": token, "user": admin}
+
+@api_router.post("/admin/create")
+async def create_admin(admin_data: AdminCreate, request: Request, authorization: str = Header(None)):
+    """Create new admin - only existing admins can create new admins"""
+    # Verify caller is admin
+    current_admin = await verify_admin(request, authorization)
+    
+    # Check if admin with email already exists
+    existing = await db.users.find_one({"email": admin_data.email}, {"_id": 0})
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    # Validate password strength
+    is_valid, error_msg = validate_password_strength(admin_data.password)
+    if not is_valid:
+        raise HTTPException(status_code=400, detail=error_msg)
+    
+    # Create admin account
+    hashed = bcrypt.hashpw(admin_data.password.encode(), bcrypt.gensalt())
+    admin_obj = {
+        "id": str(uuid.uuid4()),
+        "email": admin_data.email,
+        "full_name": admin_data.full_name,
+        "role": "admin",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_by": current_admin['id'],
+        "password": hashed.decode()
+    }
+    
+    await db.users.insert_one(admin_obj)
+    admin_obj.pop('password')
+    
+    return {"message": "Admin created successfully", "admin": admin_obj}
+
+@api_router.get("/admin/stats")
+async def get_admin_stats(request: Request, authorization: str = Header(None)):
+    """Get platform statistics"""
+    await verify_admin(request, authorization)
+    
+    # Get counts
+    total_users = await db.users.count_documents({"role": {"$ne": "admin"}})
+    startups = await db.users.count_documents({"role": "startup"})
+    job_seekers = await db.users.count_documents({"role": "job_seeker"})
+    mentors = await db.users.count_documents({"role": "mentor"})
+    mentees = await db.users.count_documents({"role": "mentee"})
+    
+    total_jobs = await db.jobs.count_documents({})
+    active_jobs = await db.jobs.count_documents({"status": "active"})
+    total_applications = await db.applications.count_documents({})
+    
+    total_mentors_profiles = await db.mentor_profiles.count_documents({})
+    total_sessions = await db.sessions.count_documents({})
+    total_messages = await db.messages.count_documents({})
+    
+    return {
+        "users": {
+            "total": total_users,
+            "startups": startups,
+            "job_seekers": job_seekers,
+            "mentors": mentors,
+            "mentees": mentees
+        },
+        "hiring": {
+            "total_jobs": total_jobs,
+            "active_jobs": active_jobs,
+            "total_applications": total_applications
+        },
+        "mentorship": {
+            "total_mentors": total_mentors_profiles,
+            "total_sessions": total_sessions
+        },
+        "engagement": {
+            "total_messages": total_messages
+        }
+    }
+
+@api_router.get("/admin/users")
+async def get_all_users(request: Request, authorization: str = Header(None), skip: int = 0, limit: int = 50, role: str = None, search: str = None):
+    """Get all users with filtering"""
+    await verify_admin(request, authorization)
+    
+    query = {"role": {"$ne": "admin"}}
+    
+    if role:
+        query["role"] = role
+    
+    if search:
+        query["$or"] = [
+            {"full_name": {"$regex": search, "$options": "i"}},
+            {"email": {"$regex": search, "$options": "i"}}
+        ]
+    
+    users = await db.users.find(query, {"_id": 0, "password": 0}).skip(skip).limit(limit).to_list(limit)
+    total = await db.users.count_documents(query)
+    
+    return {"users": users, "total": total, "skip": skip, "limit": limit}
+
+@api_router.delete("/admin/users/{user_id}")
+async def delete_user_admin(user_id: str, request: Request, authorization: str = Header(None)):
+    """Delete any user account - admin only"""
+    await verify_admin(request, authorization)
+    
+    # Cannot delete admins through this endpoint
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if user.get('role') == 'admin':
+        raise HTTPException(status_code=403, detail="Cannot delete admin accounts")
+    
+    # Delete all user data (same as account deletion)
+    await db.user_sessions.delete_many({"user_id": user_id})
+    await db.jobs.delete_many({"posted_by": user_id})
+    await db.applications.delete_many({"applicant_id": user_id})
+    await db.mentor_profiles.delete_many({"user_id": user_id})
+    await db.sessions.delete_many({"$or": [{"mentor_id": user_id}, {"mentee_id": user_id}]})
+    await db.messages.delete_many({"$or": [{"sender_id": user_id}, {"receiver_id": user_id}]})
+    await db.payments.delete_many({"user_id": user_id})
+    await db.password_resets.delete_many({"email": user['email']})
+    await db.users.delete_one({"id": user_id})
+    
+    return {"message": "User deleted successfully"}
+
+@api_router.put("/admin/users/{user_id}/role")
+async def update_user_role(user_id: str, new_role: str, request: Request, authorization: str = Header(None)):
+    """Change user role"""
+    await verify_admin(request, authorization)
+    
+    if new_role not in ['startup', 'job_seeker', 'mentor', 'mentee']:
+        raise HTTPException(status_code=400, detail="Invalid role")
+    
+    result = await db.users.update_one(
+        {"id": user_id, "role": {"$ne": "admin"}},
+        {"$set": {"role": new_role}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found or is admin")
+    
+    return {"message": "Role updated successfully"}
+
+@api_router.get("/admin/jobs")
+async def get_all_jobs_admin(request: Request, authorization: str = Header(None), skip: int = 0, limit: int = 50):
+    """Get all jobs"""
+    await verify_admin(request, authorization)
+    
+    jobs = await db.jobs.find({}, {"_id": 0}).skip(skip).limit(limit).to_list(limit)
+    total = await db.jobs.count_documents({})
+    
+    return {"jobs": jobs, "total": total}
+
+@api_router.delete("/admin/jobs/{job_id}")
+async def delete_job_admin(job_id: str, request: Request, authorization: str = Header(None)):
+    """Delete any job"""
+    await verify_admin(request, authorization)
+    
+    await db.jobs.delete_one({"id": job_id})
+    await db.applications.delete_many({"job_id": job_id})
+    
+    return {"message": "Job deleted successfully"}
+
+@api_router.get("/admin/applications")
+async def get_all_applications_admin(request: Request, authorization: str = Header(None), skip: int = 0, limit: int = 50):
+    """Get all applications"""
+    await verify_admin(request, authorization)
+    
+    applications = await db.applications.find({}, {"_id": 0}).skip(skip).limit(limit).to_list(limit)
+    total = await db.applications.count_documents({})
+    
+    return {"applications": applications, "total": total}
+
+@api_router.get("/admin/sessions")
+async def get_all_sessions_admin(request: Request, authorization: str = Header(None), skip: int = 0, limit: int = 50):
+    """Get all mentorship sessions"""
+    await verify_admin(request, authorization)
+    
+    sessions = await db.sessions.find({}, {"_id": 0}).skip(skip).limit(limit).to_list(limit)
+    total = await db.sessions.count_documents({})
+    
+    return {"sessions": sessions, "total": total}
+
 @api_router.delete("/auth/delete-account")
 async def delete_account(request: Request, response: Response, authorization: str = Header(None)):
     """Delete user account and all associated data"""
