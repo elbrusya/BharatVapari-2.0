@@ -129,7 +129,7 @@ export default function Auth() {
             Your Startup Journey Starts Here
           </h1>
           <p className="text-lg text-slate-600 leading-relaxed">
-            Join India's fastest-growing platform for startups, talent, and mentors. Build
+            Join India&apos;s fastest-growing platform for startups, talent, and mentors. Build
             connections that matter.
           </p>
         </div>
