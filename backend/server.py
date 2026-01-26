@@ -313,6 +313,16 @@ async def verify_session_token(request: Request, authorization: str = Header(Non
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid session")
 
+async def verify_admin(request: Request, authorization: str = Header(None)):
+    """Verify admin authentication"""
+    user = await verify_session_token(request, authorization)
+    
+    # Check if user is admin
+    if user.get('role') != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    return user
+
 def validate_password_strength(password: str) -> tuple[bool, str]:
     """
     Validate password strength.
