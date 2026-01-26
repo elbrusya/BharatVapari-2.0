@@ -12,6 +12,8 @@ import HiringPortal from './pages/HiringPortal';
 import MentorshipPortal from './pages/MentorshipPortal';
 import Chat from './pages/Chat';
 import Profile from './pages/Profile';
+import AdminLogin from './pages/admin/AdminLogin';
+import AdminDashboard from './pages/admin/AdminDashboard';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
