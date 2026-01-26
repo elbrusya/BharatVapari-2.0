@@ -71,12 +71,73 @@ class User(BaseModel):
 
 # Profile Models
 class UserProfile(BaseModel):
+    # Common fields
     bio: Optional[str] = None
     skills: Optional[List[str]] = []
-    experience: Optional[str] = None
     location: Optional[str] = None
-    company: Optional[str] = None
     linkedin: Optional[str] = None
+    
+    # Job Seeker specific
+    education: Optional[str] = None
+    
+    # Startup specific
+    company: Optional[str] = None
+    company_registered: Optional[bool] = None
+    has_gst: Optional[bool] = None
+    about_founder: Optional[str] = None
+    team_size: Optional[int] = None
+    
+    # Mentor specific
+    experience: Optional[str] = None
+    achievements: Optional[str] = None
+
+def validate_profile_completion(user_data: dict, profile_data: dict) -> bool:
+    """Validate if profile is complete based on user role"""
+    role = user_data.get('role')
+    
+    if role == 'job_seeker':
+        # Job Seeker: linkedin, location, skills, name, education
+        return all([
+            user_data.get('full_name'),
+            profile_data.get('linkedin'),
+            profile_data.get('location'),
+            profile_data.get('skills') and len(profile_data.get('skills', [])) > 0,
+            profile_data.get('education')
+        ])
+    
+    elif role == 'startup':
+        # Startup: company bio, registered status, GST status, about founder, linkedin, team size
+        return all([
+            profile_data.get('bio'),  # company bio
+            profile_data.get('company'),
+            profile_data.get('company_registered') is not None,
+            profile_data.get('has_gst') is not None,
+            profile_data.get('about_founder'),
+            profile_data.get('linkedin'),
+            profile_data.get('team_size') is not None
+        ])
+    
+    elif role == 'mentor':
+        # Mentor: linkedin, skills, experience, achievements, name, location
+        return all([
+            user_data.get('full_name'),
+            profile_data.get('linkedin'),
+            profile_data.get('skills') and len(profile_data.get('skills', [])) > 0,
+            profile_data.get('experience'),
+            profile_data.get('achievements'),
+            profile_data.get('location')
+        ])
+    
+    elif role == 'mentee':
+        # Mentee: basic profile (same as job_seeker for now)
+        return all([
+            user_data.get('full_name'),
+            profile_data.get('linkedin'),
+            profile_data.get('location'),
+            profile_data.get('skills') and len(profile_data.get('skills', [])) > 0
+        ])
+    
+    return False
     
 # Job Models
 class Job(BaseModel):
