@@ -151,96 +151,296 @@ export default function Profile() {
 
           {/* Profile Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <Label htmlFor="bio" className="text-sm font-medium">
-                Bio
-              </Label>
-              <Textarea
-                id="bio"
-                data-testid="profile-bio-input"
-                value={profile.bio}
-                onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-                rows={4}
-                placeholder="Tell us about yourself..."
-                className="mt-2 rounded-xl"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="skills" className="text-sm font-medium">
-                Skills (comma-separated)
-              </Label>
-              <Input
-                id="skills"
-                data-testid="profile-skills-input"
-                value={profile.skills}
-                onChange={(e) => setProfile({ ...profile, skills: e.target.value })}
-                placeholder="e.g., React, Python, Marketing"
-                className="mt-2 rounded-xl"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="experience" className="text-sm font-medium">
-                Experience
-              </Label>
-              <Textarea
-                id="experience"
-                data-testid="profile-experience-input"
-                value={profile.experience}
-                onChange={(e) => setProfile({ ...profile, experience: e.target.value })}
-                rows={3}
-                placeholder="Describe your work experience..."
-                className="mt-2 rounded-xl"
-              />
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="location" className="text-sm font-medium flex items-center gap-2">
-                  <MapPin className="w-4 h-4" />
-                  Location
-                </Label>
-                <Input
-                  id="location"
-                  data-testid="profile-location-input"
-                  value={profile.location}
-                  onChange={(e) => setProfile({ ...profile, location: e.target.value })}
-                  placeholder="e.g., Bangalore, India"
-                  className="mt-2 rounded-xl"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="company" className="text-sm font-medium flex items-center gap-2">
-                  <Briefcase className="w-4 h-4" />
-                  Company
-                </Label>
-                <Input
-                  id="company"
-                  data-testid="profile-company-input"
-                  value={profile.company}
-                  onChange={(e) => setProfile({ ...profile, company: e.target.value })}
-                  placeholder="Your company name"
-                  className="mt-2 rounded-xl"
-                />
-              </div>
-            </div>
-
+            {/* Common Fields for All Roles */}
             <div>
               <Label htmlFor="linkedin" className="text-sm font-medium flex items-center gap-2">
                 <Linkedin className="w-4 h-4" />
-                LinkedIn Profile
+                LinkedIn Profile <span className="text-red-500">*</span>
               </Label>
               <Input
                 id="linkedin"
                 data-testid="profile-linkedin-input"
                 value={profile.linkedin}
                 onChange={(e) => setProfile({ ...profile, linkedin: e.target.value })}
+                required
                 placeholder="https://linkedin.com/in/yourprofile"
                 className="mt-2 rounded-xl"
               />
             </div>
+
+            <div>
+              <Label htmlFor="location" className="text-sm font-medium flex items-center gap-2">
+                <MapPin className="w-4 h-4" />
+                Location <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="location"
+                data-testid="profile-location-input"
+                value={profile.location}
+                onChange={(e) => setProfile({ ...profile, location: e.target.value })}
+                required
+                placeholder="e.g., Bangalore, India"
+                className="mt-2 rounded-xl"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="skills" className="text-sm font-medium">
+                Skills (comma-separated) <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="skills"
+                data-testid="profile-skills-input"
+                value={profile.skills}
+                onChange={(e) => setProfile({ ...profile, skills: e.target.value })}
+                required
+                placeholder="e.g., React, Python, Marketing"
+                className="mt-2 rounded-xl"
+              />
+            </div>
+
+            {/* Job Seeker Specific Fields */}
+            {user?.role === 'job_seeker' && (
+              <>
+                <div>
+                  <Label htmlFor="education" className="text-sm font-medium">
+                    Education Qualifications <span className="text-red-500">*</span>
+                  </Label>
+                  <Textarea
+                    id="education"
+                    data-testid="profile-education-input"
+                    value={profile.education}
+                    onChange={(e) => setProfile({ ...profile, education: e.target.value })}
+                    required
+                    rows={3}
+                    placeholder="e.g., B.Tech in Computer Science from IIT Delhi (2020)"
+                    className="mt-2 rounded-xl"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="bio" className="text-sm font-medium">
+                    Bio
+                  </Label>
+                  <Textarea
+                    id="bio"
+                    data-testid="profile-bio-input"
+                    value={profile.bio}
+                    onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+                    rows={4}
+                    placeholder="Tell us about yourself..."
+                    className="mt-2 rounded-xl"
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Startup Specific Fields */}
+            {user?.role === 'startup' && (
+              <>
+                <div>
+                  <Label htmlFor="company" className="text-sm font-medium flex items-center gap-2">
+                    <Briefcase className="w-4 h-4" />
+                    Company Name <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="company"
+                    data-testid="profile-company-input"
+                    value={profile.company}
+                    onChange={(e) => setProfile({ ...profile, company: e.target.value })}
+                    required
+                    placeholder="Your company name"
+                    className="mt-2 rounded-xl"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="bio" className="text-sm font-medium">
+                    Company Bio <span className="text-red-500">*</span>
+                  </Label>
+                  <Textarea
+                    id="bio"
+                    data-testid="profile-bio-input"
+                    value={profile.bio}
+                    onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+                    required
+                    rows={4}
+                    placeholder="Describe your company..."
+                    className="mt-2 rounded-xl"
+                  />
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium">
+                      Company Registered? <span className="text-red-500">*</span>
+                    </Label>
+                    <div className="flex gap-4 mt-2">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="company_registered"
+                          data-testid="company-registered-yes"
+                          checked={profile.company_registered === true}
+                          onChange={() => setProfile({ ...profile, company_registered: true })}
+                          required
+                          className="w-4 h-4"
+                        />
+                        <span>Yes</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="company_registered"
+                          data-testid="company-registered-no"
+                          checked={profile.company_registered === false}
+                          onChange={() => setProfile({ ...profile, company_registered: false })}
+                          required
+                          className="w-4 h-4"
+                        />
+                        <span>No</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium">
+                      GST Number? <span className="text-red-500">*</span>
+                    </Label>
+                    <div className="flex gap-4 mt-2">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="has_gst"
+                          data-testid="has-gst-yes"
+                          checked={profile.has_gst === true}
+                          onChange={() => setProfile({ ...profile, has_gst: true })}
+                          required
+                          className="w-4 h-4"
+                        />
+                        <span>Yes</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="has_gst"
+                          data-testid="has-gst-no"
+                          checked={profile.has_gst === false}
+                          onChange={() => setProfile({ ...profile, has_gst: false })}
+                          required
+                          className="w-4 h-4"
+                        />
+                        <span>No</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="about_founder" className="text-sm font-medium">
+                    About Founder <span className="text-red-500">*</span>
+                  </Label>
+                  <Textarea
+                    id="about_founder"
+                    data-testid="profile-founder-input"
+                    value={profile.about_founder}
+                    onChange={(e) => setProfile({ ...profile, about_founder: e.target.value })}
+                    required
+                    rows={3}
+                    placeholder="Tell us about the founder(s)..."
+                    className="mt-2 rounded-xl"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="team_size" className="text-sm font-medium flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    Number of Team Members <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    id="team_size"
+                    data-testid="profile-teamsize-input"
+                    type="number"
+                    value={profile.team_size}
+                    onChange={(e) => setProfile({ ...profile, team_size: e.target.value })}
+                    required
+                    min="1"
+                    placeholder="e.g., 5"
+                    className="mt-2 rounded-xl"
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Mentor Specific Fields */}
+            {user?.role === 'mentor' && (
+              <>
+                <div>
+                  <Label htmlFor="experience" className="text-sm font-medium">
+                    Experience <span className="text-red-500">*</span>
+                  </Label>
+                  <Textarea
+                    id="experience"
+                    data-testid="profile-experience-input"
+                    value={profile.experience}
+                    onChange={(e) => setProfile({ ...profile, experience: e.target.value })}
+                    required
+                    rows={4}
+                    placeholder="Describe your work experience..."
+                    className="mt-2 rounded-xl"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="achievements" className="text-sm font-medium">
+                    Achievements <span className="text-red-500">*</span>
+                  </Label>
+                  <Textarea
+                    id="achievements"
+                    data-testid="profile-achievements-input"
+                    value={profile.achievements}
+                    onChange={(e) => setProfile({ ...profile, achievements: e.target.value })}
+                    required
+                    rows={3}
+                    placeholder="List your key achievements..."
+                    className="mt-2 rounded-xl"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="bio" className="text-sm font-medium">
+                    Bio
+                  </Label>
+                  <Textarea
+                    id="bio"
+                    data-testid="profile-bio-input"
+                    value={profile.bio}
+                    onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+                    rows={3}
+                    placeholder="Tell us about yourself..."
+                    className="mt-2 rounded-xl"
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Mentee Specific Fields */}
+            {user?.role === 'mentee' && (
+              <div>
+                <Label htmlFor="bio" className="text-sm font-medium">
+                  Bio
+                </Label>
+                <Textarea
+                  id="bio"
+                  data-testid="profile-bio-input"
+                  value={profile.bio}
+                  onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+                  rows={4}
+                  placeholder="Tell us about yourself and what you're looking for..."
+                  className="mt-2 rounded-xl"
+                />
+              </div>
+            )}
 
             <Button
               type="submit"
