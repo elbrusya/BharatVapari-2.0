@@ -349,6 +349,119 @@ export default function AdminDashboard() {
           </div>
         )}
 
+        {/* Admin Requests Tab */}
+        {activeTab === 'requests' && (
+          <div>
+            <h2 className=\"text-2xl font-bold text-white mb-6\" style={{ fontFamily: 'Outfit' }}>
+              Admin Access Requests
+            </h2>
+
+            {pendingRequests.length === 0 ? (
+              <Card className=\"p-12 bg-slate-800 border-slate-700 text-center\">
+                <Shield className=\"w-16 h-16 text-slate-600 mx-auto mb-4\" />
+                <p className=\"text-slate-400\">No pending admin requests</p>
+              </Card>
+            ) : (
+              <div className=\"space-y-4\">
+                {adminRequests.map((request) => (
+                  <Card key={request.id} className=\"p-6 bg-slate-800 border-slate-700\">
+                    <div className=\"flex items-start justify-between\">
+                      <div className=\"flex-1\">
+                        <div className=\"flex items-center gap-3 mb-3\">
+                          <h3 className=\"text-lg font-semibold text-white\">{request.full_name}</h3>
+                          <span className={`px-3 py-1 text-xs font-medium rounded-full ${
+                            request.status === 'pending' ? 'bg-yellow-900 text-yellow-300' :
+                            request.status === 'approved' ? 'bg-green-900 text-green-300' :
+                            'bg-red-900 text-red-300'
+                          }`}>
+                            {request.status}
+                          </span>
+                        </div>
+                        <p className=\"text-slate-300 mb-2\">{request.email}</p>
+                        <div className=\"bg-slate-700/50 rounded-lg p-4 mb-3\">
+                          <p className=\"text-sm text-slate-400 mb-1\">Reason:</p>
+                          <p className=\"text-sm text-white\">{request.reason}</p>
+                        </div>
+                        <p className=\"text-xs text-slate-500\">
+                          Requested: {new Date(request.created_at).toLocaleString()}
+                        </p>
+                      </div>
+                      
+                      {request.status === 'pending' && (
+                        <div className=\"flex gap-2 ml-4\">
+                          <Button
+                            onClick={() => {
+                              setSelectedRequest(request);
+                              setShowApprovalModal(true);
+                            }}
+                            className=\"bg-green-600 hover:bg-green-700 text-white\"
+                            data-testid={`approve-request-${request.id}`}
+                          >
+                            Approve
+                          </Button>
+                          <Button
+                            onClick={() => handleRejectRequest(request.id)}
+                            variant=\"destructive\"
+                            data-testid={`reject-request-${request.id}`}
+                          >
+                            Reject
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            {/* Approval Modal */}
+            {showApprovalModal && selectedRequest && (
+              <div className=\"fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-6\">
+                <Card className=\"w-full max-w-md p-6 bg-slate-800 border-slate-700\">
+                  <h3 className=\"text-xl font-bold text-white mb-4\">Approve Admin Access</h3>
+                  <p className=\"text-slate-300 mb-4\">
+                    Approve admin access for <strong>{selectedRequest.email}</strong>?
+                  </p>
+                  <div className=\"mb-6\">
+                    <Label className=\"text-slate-300 mb-2 block\">Set Temporary Password</Label>
+                    <Input
+                      type=\"text\"
+                      value={tempPassword}
+                      onChange={(e) => setTempPassword(e.target.value)}
+                      placeholder=\"Enter temporary password\"
+                      className=\"bg-slate-700 border-slate-600 text-white\"
+                      data-testid=\"temp-password-input\"
+                    />
+                    <p className=\"text-xs text-slate-500 mt-2\">
+                      Share this password securely with the new admin. They should change it after first login.
+                    </p>
+                  </div>
+                  <div className=\"flex gap-3\">
+                    <Button
+                      onClick={handleApproveRequest}
+                      className=\"flex-1 bg-green-600 hover:bg-green-700\"
+                      data-testid=\"confirm-approve-button\"
+                    >
+                      Confirm Approval
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setShowApprovalModal(false);
+                        setSelectedRequest(null);
+                        setTempPassword('');
+                      }}
+                      variant=\"outline\"
+                      className=\"flex-1 border-slate-600\"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </Card>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Users Tab */}
         {activeTab === 'users' && (
           <div>
