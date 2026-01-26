@@ -419,6 +419,66 @@ async def logout(request: Request, response: Response, authorization: str = Head
     
     return {"message": "Logged out successfully"}
 
+@api_router.delete("/auth/delete-account")
+async def delete_account(request: Request, response: Response, authorization: str = Header(None)):
+    """Delete user account and all associated data"""
+    # Verify user authentication
+    user = await verify_session_token(request, authorization)
+    user_id = user['id']
+    
+    try:
+        # Delete all user-related data
+        # 1. Delete user's sessions
+        await db.user_sessions.delete_many({"user_id": user_id})
+        
+        # 2. Delete user's jobs (if startup)
+        await db.jobs.delete_many({"posted_by": user_id})
+        
+        # 3. Delete user's applications
+        await db.applications.delete_many({"applicant_id": user_id})
+        
+        # 4. Delete user's mentor profile
+        await db.mentor_profiles.delete_many({"user_id": user_id})
+        
+        # 5. Delete user's mentorship sessions
+        await db.sessions.delete_many({
+            "$or": [
+                {"mentor_id": user_id},
+                {"mentee_id": user_id}
+            ]
+        })
+        
+        # 6. Delete user's messages
+        await db.messages.delete_many({
+            "$or": [
+                {"sender_id": user_id},
+                {"receiver_id": user_id}
+            ]
+        })
+        
+        # 7. Delete user's payments
+        await db.payments.delete_many({"user_id": user_id})
+        
+        # 8. Delete password reset codes
+        await db.password_resets.delete_many({"email": user['email']})
+        
+        # 9. Finally, delete the user account
+        result = await db.users.delete_one({"id": user_id})
+        
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # Clear session cookie
+        response.delete_cookie(key="session_token", path="/")
+        
+        return {
+            "message": "Account deleted successfully",
+            "deleted": True
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to delete account: {str(e)}")
+
 @api_router.post("/auth/forgot-password")
 async def forgot_password(request: PasswordResetRequest):
     # Validate email format
