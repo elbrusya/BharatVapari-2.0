@@ -550,6 +550,122 @@ async def logout(request: Request, response: Response, authorization: str = Head
     return {"message": "Logged out successfully"}
 
 # Admin Routes
+@api_router.post("/admin/request")
+async def request_admin_access(request_data: AdminRequest):
+    """Submit request for admin access"""
+    # Check if email already exists
+    existing = await db.users.find_one({"email": request_data.email}, {"_id": 0})
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered. Please use a different email.")
+    
+    # Check if request already exists
+    existing_request = await db.admin_requests.find_one({"email": request_data.email, "status": "pending"}, {"_id": 0})
+    if existing_request:
+        raise HTTPException(status_code=400, detail="You already have a pending admin request")
+    
+    # Create request
+    request_doc = {
+        "id": str(uuid.uuid4()),
+        "email": request_data.email,
+        "full_name": request_data.full_name,
+        "reason": request_data.reason,
+        "status": "pending",  # pending, approved, rejected
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.admin_requests.insert_one(request_doc)
+    
+    return {
+        "message": "Admin access request submitted successfully. You will be notified once approved.",
+        "request_id": request_doc["id"]
+    }
+
+@api_router.get("/admin/requests")
+async def get_admin_requests(request: Request, authorization: str = Header(None)):
+    """Get all pending admin requests - admin only"""
+    await verify_admin(request, authorization)
+    
+    requests = await db.admin_requests.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
+    return {"requests": requests}
+
+@api_router.post("/admin/requests/approve")
+async def approve_admin_request(approval: AdminRequestApproval, request: Request, authorization: str = Header(None)):
+    """Approve or reject admin request - admin only"""
+    current_admin = await verify_admin(request, authorization)
+    
+    # Get the request
+    admin_request = await db.admin_requests.find_one({"id": approval.request_id}, {"_id": 0})
+    if not admin_request:
+        raise HTTPException(status_code=404, detail="Request not found")
+    
+    if admin_request["status"] != "pending":
+        raise HTTPException(status_code=400, detail="Request already processed")
+    
+    if approval.approved:
+        # Check if password provided
+        if not approval.password:
+            raise HTTPException(status_code=400, detail="Password required for approval")
+        
+        # Validate password strength
+        is_valid, error_msg = validate_password_strength(approval.password)
+        if not is_valid:
+            raise HTTPException(status_code=400, detail=error_msg)
+        
+        # Create admin account
+        hashed = bcrypt.hashpw(approval.password.encode(), bcrypt.gensalt())
+        admin_obj = {
+            "id": str(uuid.uuid4()),
+            "email": admin_request["email"],
+            "full_name": admin_request["full_name"],
+            "role": "admin",
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "approved_by": current_admin['id'],
+            "password": hashed.decode()
+        }
+        
+        await db.users.insert_one(admin_obj)
+        
+        # Update request status
+        await db.admin_requests.update_one(
+            {"id": approval.request_id},
+            {"$set": {
+                "status": "approved",
+                "approved_by": current_admin['id'],
+                "approved_at": datetime.now(timezone.utc).isoformat()
+            }}
+        )
+        
+        return {
+            "message": "Admin request approved successfully",
+            "email": admin_request["email"],
+            "temp_password": approval.password
+        }
+    else:
+        # Reject request
+        await db.admin_requests.update_one(
+            {"id": approval.request_id},
+            {"$set": {
+                "status": "rejected",
+                "rejected_by": current_admin['id'],
+                "rejected_at": datetime.now(timezone.utc).isoformat()
+            }}
+        )
+        
+        return {"message": "Admin request rejected"}
+
+@api_router.get("/admin/requests/my-status")
+async def check_my_request_status(email: str):
+    """Check status of admin request by email"""
+    request = await db.admin_requests.find_one({"email": email}, {"_id": 0, "reason": 0})
+    if not request:
+        return {"status": "not_found", "message": "No request found for this email"}
+    
+    return {
+        "status": request["status"],
+        "created_at": request.get("created_at"),
+        "message": f"Your request is {request['status']}"
+    }
+
 @api_router.post("/admin/login")
 async def admin_login(credentials: AdminLogin):
     """Admin login - only for pre-configured admin accounts"""
