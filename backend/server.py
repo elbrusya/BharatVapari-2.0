@@ -83,7 +83,9 @@ class UserProfile(BaseModel):
     # Startup specific
     company: Optional[str] = None
     company_registered: Optional[bool] = None
+    registration_number: Optional[str] = None  # NEW: Company registration number
     has_gst: Optional[bool] = None
+    gst_number: Optional[str] = None  # NEW: GST number
     about_founder: Optional[str] = None
     team_size: Optional[int] = None
     
@@ -107,7 +109,8 @@ def validate_profile_completion(user_data: dict, profile_data: dict) -> bool:
     
     elif role == 'startup':
         # Startup: company bio, registered status, GST status, about founder, linkedin, team size
-        return all([
+        # Plus registration number if registered, GST number if has GST
+        basic_required = all([
             profile_data.get('bio'),  # company bio
             profile_data.get('company'),
             profile_data.get('company_registered') is not None,
@@ -116,6 +119,16 @@ def validate_profile_completion(user_data: dict, profile_data: dict) -> bool:
             profile_data.get('linkedin'),
             profile_data.get('team_size') is not None
         ])
+        
+        # If company is registered, registration number is required
+        if profile_data.get('company_registered'):
+            basic_required = basic_required and profile_data.get('registration_number')
+        
+        # If has GST, GST number is required
+        if profile_data.get('has_gst'):
+            basic_required = basic_required and profile_data.get('gst_number')
+        
+        return basic_required
     
     elif role == 'mentor':
         # Mentor: linkedin, skills, experience, achievements, name, location
