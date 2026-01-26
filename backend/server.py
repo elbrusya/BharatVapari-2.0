@@ -193,32 +193,42 @@ async def verify_session_token(request: Request, authorization: str = Header(Non
     if not session_token:
         raise HTTPException(status_code=401, detail="Not authenticated")
     
-    # Find session in database
+    # Try session-based auth first (cookie)
     session_doc = await db.user_sessions.find_one(
         {"session_token": session_token},
         {"_id": 0}
     )
     
-    if not session_doc:
+    if session_doc:
+        # Session found - check expiration
+        expires_at = session_doc["expires_at"]
+        if isinstance(expires_at, str):
+            expires_at = datetime.fromisoformat(expires_at)
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=timezone.utc)
+        
+        if expires_at < datetime.now(timezone.utc):
+            await db.user_sessions.delete_one({"session_token": session_token})
+            raise HTTPException(status_code=401, detail="Session expired")
+        
+        # Get user data
+        user = await db.users.find_one({"id": session_doc["user_id"]}, {"_id": 0, "password": 0})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        return user
+    
+    # Fallback to JWT token auth
+    try:
+        payload = jwt.decode(session_token, JWT_SECRET, algorithms=[ALGORITHM])
+        user = await db.users.find_one({"id": payload['user_id']}, {"_id": 0, "password": 0})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        return user
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid session")
-    
-    # Check expiration with timezone awareness
-    expires_at = session_doc["expires_at"]
-    if isinstance(expires_at, str):
-        expires_at = datetime.fromisoformat(expires_at)
-    if expires_at.tzinfo is None:
-        expires_at = expires_at.replace(tzinfo=timezone.utc)
-    
-    if expires_at < datetime.now(timezone.utc):
-        await db.user_sessions.delete_one({"session_token": session_token})
-        raise HTTPException(status_code=401, detail="Session expired")
-    
-    # Get user data
-    user = await db.users.find_one({"id": session_doc["user_id"]}, {"_id": 0, "password": 0})
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    return user
 
 def validate_password_strength(password: str) -> tuple[bool, str]:
     """
