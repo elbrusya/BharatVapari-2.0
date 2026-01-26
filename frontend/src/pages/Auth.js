@@ -112,6 +112,12 @@ export default function Auth() {
     { value: 'mentee', label: 'Mentee', icon: Users, color: 'purple' },
   ];
 
+  const handleGoogleLogin = () => {
+    // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
+    const redirectUrl = window.location.origin + '/dashboard';
+    window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-amber-50 flex items-center justify-center p-6">
       <div className="w-full max-w-6xl grid md:grid-cols-2 gap-8 items-center">
