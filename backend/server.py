@@ -660,12 +660,26 @@ async def find_email(full_name: str):
 
 # Profile Routes
 @api_router.put("/profile")
-async def update_profile(profile: UserProfile, payload: dict = Depends(verify_token)):
+async def update_profile(profile: UserProfile, request: Request, authorization: str = Header(None)):
+    user = await verify_session_token(request, authorization)
+    user_id = user['id']
+    
+    # Update profile
+    profile_dict = {k: v for k, v in profile.model_dump().items() if v is not None}
+    
+    # Check if profile is complete based on role
+    is_complete = validate_profile_completion(user, profile_dict)
+    profile_dict['profile_complete'] = is_complete
+    
     await db.users.update_one(
-        {"id": payload['user_id']},
-        {"$set": {**profile.model_dump(), "profile_complete": True}}
+        {"id": user_id},
+        {"$set": profile_dict}
     )
-    return {"message": "Profile updated successfully"}
+    
+    return {
+        "message": "Profile updated successfully",
+        "profile_complete": is_complete
+    }
 
 @api_router.get("/profile/{user_id}")
 async def get_user_profile(user_id: str):
