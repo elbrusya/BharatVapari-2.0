@@ -31,10 +31,19 @@ export default function Profile() {
   const [profile, setProfile] = useState({
     bio: '',
     skills: '',
-    experience: '',
     location: '',
-    company: '',
     linkedin: '',
+    // Job Seeker fields
+    education: '',
+    // Startup fields
+    company: '',
+    company_registered: null,
+    has_gst: null,
+    about_founder: '',
+    team_size: '',
+    // Mentor fields
+    experience: '',
+    achievements: '',
   });
   const [loading, setLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -44,10 +53,16 @@ export default function Profile() {
       setProfile({
         bio: user.bio || '',
         skills: user.skills?.join(', ') || '',
-        experience: user.experience || '',
         location: user.location || '',
-        company: user.company || '',
         linkedin: user.linkedin || '',
+        education: user.education || '',
+        company: user.company || '',
+        company_registered: user.company_registered ?? null,
+        has_gst: user.has_gst ?? null,
+        about_founder: user.about_founder || '',
+        team_size: user.team_size || '',
+        experience: user.experience || '',
+        achievements: user.achievements || '',
       });
     }
   }, [user]);
