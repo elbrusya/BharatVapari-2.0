@@ -1,14 +1,17 @@
-import { useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
+import RoleSelection from './RoleSelection';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
 export default function AuthCallback() {
-  const navigate = useNavigate();
   const location = useLocation();
   const hasProcessed = useRef(false);
+  const [showRoleSelection, setShowRoleSelection] = useState(false);
+  const [sessionId, setSessionId] = useState(null);
+  const [userData, setUserData] = useState(null);
 
   useEffect(() => {
     // CRITICAL: Prevent double execution in StrictMode
@@ -20,49 +23,68 @@ export default function AuthCallback() {
         // Extract session_id from URL fragment
         const hash = location.hash.substring(1);
         const params = new URLSearchParams(hash);
-        const sessionId = params.get('session_id');
+        const extractedSessionId = params.get('session_id');
 
-        if (!sessionId) {
+        if (!extractedSessionId) {
           toast.error('Invalid authentication response');
-          navigate('/auth');
+          window.location.href = '/auth';
           return;
         }
 
-        // Exchange session_id for user data and session_token
-        const response = await axios.post(
-          `${API}/auth/google/session`,
-          {},
+        // First, check if user exists by getting user data from Emergent
+        const emergentResponse = await axios.get(
+          'https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data',
           {
-            headers: {
-              'X-Session-ID': sessionId,
-            },
-            withCredentials: true, // Important for cookies
+            headers: { 'X-Session-ID': extractedSessionId },
           }
         );
 
-        if (response.data.success) {
-          // Store user in localStorage for immediate access
-          localStorage.setItem('user', JSON.stringify(response.data.user));
-          
-          toast.success('Welcome to BharatVapari!');
-          
-          // Navigate to dashboard with user data
-          navigate('/dashboard', {
-            replace: true,
-            state: { user: response.data.user }
-          });
+        const oauthData = emergentResponse.data;
+        const email = oauthData.email;
+        const name = oauthData.name;
+
+        // Check if user already exists in our database
+        const checkResponse = await axios.post(
+          `${API}/auth/google/check-user`,
+          { email },
+          { withCredentials: true }
+        );
+
+        if (checkResponse.data.exists) {
+          // Existing user - complete login directly
+          const response = await axios.post(
+            `${API}/auth/google/session`,
+            {},
+            {
+              headers: { 'X-Session-ID': extractedSessionId },
+              withCredentials: true,
+            }
+          );
+
+          if (response.data.success) {
+            localStorage.setItem('user', JSON.stringify(response.data.user));
+            toast.success('Welcome back to BharatVapari!');
+            window.location.href = '/dashboard';
+          }
         } else {
-          throw new Error('Authentication failed');
+          // New user - show role selection
+          setSessionId(extractedSessionId);
+          setUserData({ name, email });
+          setShowRoleSelection(true);
         }
       } catch (error) {
         console.error('Auth callback error:', error);
-        toast.error(error.response?.data?.detail || 'Authentication failed');
-        navigate('/auth');
+        toast.error('Authentication failed');
+        window.location.href = '/auth';
       }
     };
 
     processSession();
-  }, [location, navigate]);
+  }, [location]);
+
+  if (showRoleSelection) {
+    return <RoleSelection sessionId={sessionId} userData={userData} />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-stone-50 via-white to-amber-50 flex items-center justify-center">
