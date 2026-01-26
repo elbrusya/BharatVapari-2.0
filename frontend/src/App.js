@@ -14,6 +14,7 @@ import Chat from './pages/Chat';
 import Profile from './pages/Profile';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminRequest from './pages/admin/AdminRequest';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
