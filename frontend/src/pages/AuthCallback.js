@@ -14,13 +14,11 @@ export default function AuthCallback() {
   const [userData, setUserData] = useState(null);
 
   useEffect(() => {
-    // CRITICAL: Prevent double execution in StrictMode
     if (hasProcessed.current) return;
     hasProcessed.current = true;
 
     const processSession = async () => {
       try {
-        // Extract session_id from URL fragment
         const hash = location.hash.substring(1);
         const params = new URLSearchParams(hash);
         const extractedSessionId = params.get('session_id');
@@ -31,50 +29,35 @@ export default function AuthCallback() {
           return;
         }
 
-        // First, check if user exists by getting user data from Emergent
-        const emergentResponse = await axios.get(
-          'https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data',
+        // Try to complete login/registration
+        const response = await axios.post(
+          `${API}/auth/google/session`,
+          {},
           {
             headers: { 'X-Session-ID': extractedSessionId },
+            withCredentials: true,
           }
         );
 
-        const oauthData = emergentResponse.data;
-        const email = oauthData.email;
-        const name = oauthData.name;
-
-        // Check if user already exists in our database
-        const checkResponse = await axios.post(
-          `${API}/auth/google/check-user`,
-          { email },
-          { withCredentials: true }
-        );
-
-        if (checkResponse.data.exists) {
-          // Existing user - complete login directly
-          const response = await axios.post(
-            `${API}/auth/google/session`,
-            {},
-            {
-              headers: { 'X-Session-ID': extractedSessionId },
-              withCredentials: true,
-            }
-          );
-
-          if (response.data.success) {
+        if (response.data.success) {
+          if (response.data.is_new_user) {
+            // New user - show role selection
+            setSessionId(extractedSessionId);
+            setUserData({ 
+              name: response.data.user.full_name, 
+              email: response.data.user.email 
+            });
+            setShowRoleSelection(true);
+          } else {
+            // Existing user - go to dashboard
             localStorage.setItem('user', JSON.stringify(response.data.user));
             toast.success('Welcome back to BharatVapari!');
             window.location.href = '/dashboard';
           }
-        } else {
-          // New user - show role selection
-          setSessionId(extractedSessionId);
-          setUserData({ name, email });
-          setShowRoleSelection(true);
         }
       } catch (error) {
         console.error('Auth callback error:', error);
-        toast.error('Authentication failed');
+        toast.error(error.response?.data?.detail || 'Authentication failed');
         window.location.href = '/auth';
       }
     };
