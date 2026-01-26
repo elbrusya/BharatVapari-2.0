@@ -56,7 +56,7 @@ export default function Auth() {
               <Sparkles className="w-6 h-6 text-white" />
             </div>
             <span className="text-3xl font-bold" style={{ fontFamily: 'Outfit' }}>
-              StartupConnect
+              BharatVapari
             </span>
           </div>
           <h1 className="text-5xl font-bold mb-6" style={{ fontFamily: 'Outfit' }}>

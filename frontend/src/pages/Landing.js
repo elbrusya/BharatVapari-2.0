@@ -16,7 +16,7 @@ export default function Landing() {
                 <Sparkles className="w-5 h-5 text-white" />
               </div>
               <span className="text-2xl font-bold" style={{ fontFamily: 'Outfit' }}>
-                StartupConnect
+                BharatVapari
               </span>
             </div>
             <Link to="/auth">
@@ -181,7 +181,7 @@ export default function Landing() {
       {/* Footer */}
       <footer className="border-t border-slate-200 py-8">
         <div className="max-w-7xl mx-auto px-6 text-center text-slate-600">
-          <p>© 2024 StartupConnect. Built for the Indian startup ecosystem.</p>
+          <p>© 2024 BharatVapari. Built for the Indian startup ecosystem.</p>
         </div>
       </footer>
     </div>

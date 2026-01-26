@@ -21,7 +21,7 @@ export default function Navbar() {
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <span className="text-2xl font-bold" style={{ fontFamily: 'Outfit' }}>
-              StartupConnect
+              BharatVapari
             </span>
           </Link>
 

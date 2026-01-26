@@ -37,7 +37,7 @@ api_router = APIRouter(prefix="/api")
 # Health check route
 @api_router.get("/")
 async def root():
-    return {"message": "StartupConnect API is running", "status": "healthy"}
+    return {"message": "BharatVapari API is running", "status": "healthy"}
 
 # Auth Models
 class UserRegister(BaseModel):
