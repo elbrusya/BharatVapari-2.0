@@ -228,6 +228,79 @@ export default function Profile() {
             </Button>
           </form>
         </Card>
+
+        {/* Danger Zone - Delete Account */}
+        <Card className="p-8 rounded-2xl border-2 border-red-200 bg-red-50/50 shadow-sm mt-8">
+          <div className="flex items-start gap-4 mb-6">
+            <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
+              <AlertTriangle className="w-6 h-6 text-red-600" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-xl font-bold text-red-900 mb-2" style={{ fontFamily: 'Outfit' }}>
+                Danger Zone
+              </h3>
+              <p className="text-red-700 mb-4">
+                Once you delete your account, there is no going back. This will permanently delete:
+              </p>
+              <ul className="text-sm text-red-700 space-y-1 mb-4">
+                <li>• Your profile and personal information</li>
+                <li>• All job posts and applications</li>
+                <li>• Mentor/mentee profiles and sessions</li>
+                <li>• All messages and conversations</li>
+                <li>• Payment history and bookings</li>
+              </ul>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    data-testid="delete-account-button"
+                    variant="destructive"
+                    className="rounded-full px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold flex items-center gap-2"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                    Delete My Account
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="text-2xl font-bold flex items-center gap-2">
+                      <AlertTriangle className="w-6 h-6 text-red-600" />
+                      Are you absolutely sure?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription className="text-base pt-4">
+                      This action <span className="font-bold text-red-600">cannot be undone</span>. This will permanently delete your
+                      account and remove all your data from our servers.
+                      <br />
+                      <br />
+                      <span className="font-semibold">Account:</span> {user?.email}
+                      <br />
+                      <span className="font-semibold">Name:</span> {user?.full_name}
+                      <br />
+                      <br />
+                      All associated data including jobs, applications, messages, and sessions will be
+                      permanently deleted.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel
+                      data-testid="cancel-delete-button"
+                      className="rounded-full px-6"
+                    >
+                      Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      data-testid="confirm-delete-button"
+                      onClick={handleDeleteAccount}
+                      disabled={deleteLoading}
+                      className="rounded-full px-6 bg-red-600 hover:bg-red-700 text-white"
+                    >
+                      {deleteLoading ? 'Deleting...' : 'Yes, Delete My Account'}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </div>
+        </Card>
       </div>
     </div>
   );
