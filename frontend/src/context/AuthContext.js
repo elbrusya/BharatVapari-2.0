@@ -19,21 +19,29 @@ export const AuthProvider = ({ children }) => {
   const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
   useEffect(() => {
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      fetchUser();
-    } else {
-      setLoading(false);
-    }
-  }, [token]);
+    // Check for session-based auth first (Google OAuth)
+    fetchUser();
+  }, []);
 
   const fetchUser = async () => {
     try {
-      const response = await axios.get(`${API}/auth/me`);
+      // Try to get user from session (cookie-based auth)
+      const response = await axios.get(`${API}/auth/me`, {
+        withCredentials: true // Send cookies
+      });
       setUser(response.data);
     } catch (error) {
-      console.error('Failed to fetch user', error);
-      logout();
+      // If session auth fails, try JWT token
+      if (token) {
+        try {
+          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          const response = await axios.get(`${API}/auth/me`);
+          setUser(response.data);
+        } catch (err) {
+          console.error('Failed to fetch user with token', err);
+          logout();
+        }
+      }
     } finally {
       setLoading(false);
     }
@@ -64,15 +72,23 @@ export const AuthProvider = ({ children }) => {
     return user;
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      // Call backend logout to clear session
+      await axios.post(`${API}/auth/logout`, {}, { withCredentials: true });
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+    
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setToken(null);
     setUser(null);
     delete axios.defaults.headers.common['Authorization'];
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, token, login, register, logout, loading, setUser }}>
       {children}
     </AuthContext.Provider>
   );
