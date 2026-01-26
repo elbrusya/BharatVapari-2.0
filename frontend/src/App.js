@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { Toaster } from 'sonner';
 import Landing from './pages/Landing';
 import Auth from './pages/Auth';
+import ForgotPassword from './pages/ForgotPassword';
 import Dashboard from './pages/Dashboard';
 import HiringPortal from './pages/HiringPortal';
 import MentorshipPortal from './pages/MentorshipPortal';
@@ -31,6 +32,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={user ? <Navigate to="/dashboard" /> : <Landing />} />
       <Route path="/auth" element={user ? <Navigate to="/dashboard" /> : <Auth />} />
+      <Route path="/forgot-password" element={user ? <Navigate to="/dashboard" /> : <ForgotPassword />} />
       <Route
         path="/dashboard"
         element={
