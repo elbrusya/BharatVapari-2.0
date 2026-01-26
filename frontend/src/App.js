@@ -28,6 +28,13 @@ const ProtectedRoute = ({ children }) => {
 
 function AppRoutes() {
   const { user } = useAuth();
+  const location = useLocation();
+
+  // CRITICAL: Check for session_id in URL fragment (not query params)
+  // This must happen during render, not in useEffect, to prevent race conditions
+  if (location.hash?.includes('session_id=')) {
+    return <AuthCallback />;
+  }
 
   return (
     <Routes>
