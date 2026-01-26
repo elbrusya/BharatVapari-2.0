@@ -265,6 +265,18 @@ export default function Auth() {
             >
               {loading ? 'Please wait...' : isLogin ? 'Sign In' : 'Create Account'}
             </Button>
+
+            {isLogin && (
+              <div className="text-center mt-4">
+                <Link
+                  to="/forgot-password"
+                  data-testid="forgot-password-link"
+                  className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                >
+                  Forgot Password or Email?
+                </Link>
+              </div>
+            )}
           </form>
 
           <div className="mt-6 text-center">
