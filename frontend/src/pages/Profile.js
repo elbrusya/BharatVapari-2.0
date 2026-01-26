@@ -75,9 +75,19 @@ export default function Profile() {
       const data = {
         ...profile,
         skills: profile.skills.split(',').map((s) => s.trim()).filter((s) => s),
+        team_size: profile.team_size ? parseInt(profile.team_size) : null,
       };
-      await api.updateProfile(data);
-      toast.success('Profile updated successfully!');
+      
+      const response = await api.updateProfile(data);
+      
+      if (response.data.profile_complete) {
+        toast.success('Profile completed successfully! 🎉');
+      } else {
+        toast.success('Profile updated! Please complete all required fields.');
+      }
+      
+      // Refresh page to update profile_complete status
+      window.location.reload();
     } catch (error) {
       toast.error('Failed to update profile');
     } finally {
