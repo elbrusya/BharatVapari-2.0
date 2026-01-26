@@ -37,6 +37,7 @@ export default function Profile() {
     linkedin: '',
   });
   const [loading, setLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -66,6 +67,29 @@ export default function Profile() {
       toast.error('Failed to update profile');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleteLoading(true);
+
+    try {
+      await axios.delete(`${API}/auth/delete-account`, {
+        withCredentials: true,
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+      toast.success('Account deleted successfully');
+      
+      // Logout and redirect to landing page
+      await logout();
+      navigate('/', { replace: true });
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to delete account');
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
