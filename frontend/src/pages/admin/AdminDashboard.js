@@ -105,6 +105,49 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleApproveRequest = async () => {
+    if (!tempPassword) {
+      toast.error('Please enter a temporary password');
+      return;
+    }
+
+    try {
+      await axios.post(`${API}/admin/requests/approve`, {
+        request_id: selectedRequest.id,
+        approved: true,
+        password: tempPassword,
+      });
+      
+      toast.success(`Admin access approved for ${selectedRequest.email}`);
+      setShowApprovalModal(false);
+      setSelectedRequest(null);
+      setTempPassword('');
+      fetchData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to approve request');
+    }
+  };
+
+  const handleRejectRequest = async (requestId) => {
+    if (!window.confirm('Are you sure you want to reject this admin request?')) {
+      return;
+    }
+
+    try {
+      await axios.post(`${API}/admin/requests/approve`, {
+        request_id: requestId,
+        approved: false,
+      });
+      
+      toast.success('Admin request rejected');
+      fetchData();
+    } catch (error) {
+      toast.error('Failed to reject request');
+    }
+  };
+
+  const pendingRequests = adminRequests.filter(req => req.status === 'pending');
+
   const filteredUsers = users.filter(
     (user) =>
       user.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
