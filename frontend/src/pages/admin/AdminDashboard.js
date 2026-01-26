@@ -216,6 +216,23 @@ export default function AdminDashboard() {
             Overview
           </button>
           <button
+            onClick={() => setActiveTab('requests')}
+            className={`px-4 py-3 font-medium transition-colors relative ${
+              activeTab === 'requests'
+                ? 'text-amber-500 border-b-2 border-amber-500'
+                : 'text-slate-400 hover:text-white'
+            }`}
+            data-testid=\"tab-requests\"
+          >
+            <Shield className=\"w-5 h-5 inline mr-2\" />
+            Admin Requests
+            {pendingRequests.length > 0 && (
+              <span className=\"absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center\">
+                {pendingRequests.length}
+              </span>
+            )}
+          </button>
+          <button
             onClick={() => setActiveTab('users')}
             className={`px-4 py-3 font-medium transition-colors ${
               activeTab === 'users'
