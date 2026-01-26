@@ -381,12 +381,6 @@ async def get_current_user(request: Request, authorization: str = Header(None)):
     return user
 
 # Google OAuth Routes
-@api_router.post("/auth/google/check-user")
-async def check_google_user(email: EmailStr):
-    """Check if user with email already exists"""
-    user = await db.users.find_one({"email": email}, {"_id": 0})
-    return {"exists": user is not None}
-
 @api_router.post("/auth/google/session")
 async def google_session(request: Request, response: Response, x_session_id: str = Header(None, alias="X-Session-ID")):
     """Exchange session_id from Google OAuth for user data and session_token"""
@@ -395,7 +389,7 @@ async def google_session(request: Request, response: Response, x_session_id: str
         raise HTTPException(status_code=400, detail="X-Session-ID header required")
     
     try:
-        # Get role from request body (for new users)
+        # Get role from request body (for role update)
         body = await request.json() if request.headers.get('content-length') else {}
         selected_role = body.get('role')
         
@@ -422,10 +416,20 @@ async def google_session(request: Request, response: Response, x_session_id: str
         
         # Check if user exists
         existing_user = await db.users.find_one({"email": email}, {"_id": 0})
+        is_new_user = existing_user is None
         
         if existing_user:
-            # Update user data
+            # Existing user - just update session
             user_id = existing_user["id"]
+            
+            # If role is provided, update it (for role selection flow)
+            if selected_role and selected_role in ['startup', 'job_seeker', 'mentor', 'mentee']:
+                await db.users.update_one(
+                    {"id": user_id},
+                    {"$set": {"role": selected_role}}
+                )
+            
+            # Update profile picture and name
             await db.users.update_one(
                 {"id": user_id},
                 {"$set": {
@@ -435,10 +439,8 @@ async def google_session(request: Request, response: Response, x_session_id: str
                 }}
             )
         else:
-            # Create new user with Google OAuth
+            # New user - create with role or default
             user_id = str(uuid.uuid4())
-            
-            # Use selected role or default to job_seeker
             user_role = selected_role if selected_role in ['startup', 'job_seeker', 'mentor', 'mentee'] else 'job_seeker'
             
             user_doc = {
@@ -472,7 +474,7 @@ async def google_session(request: Request, response: Response, x_session_id: str
             httponly=True,
             secure=True,
             samesite="none",
-            max_age=7*24*60*60,  # 7 days
+            max_age=7*24*60*60,
             path="/"
         )
         
@@ -482,6 +484,7 @@ async def google_session(request: Request, response: Response, x_session_id: str
         return {
             "success": True,
             "user": user,
+            "is_new_user": is_new_user and not selected_role,  # Show role selection only for brand new users
             "message": "Authentication successful"
         }
         
