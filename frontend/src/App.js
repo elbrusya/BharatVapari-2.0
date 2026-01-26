@@ -5,6 +5,7 @@ import { Toaster } from 'sonner';
 import Landing from './pages/Landing';
 import Auth from './pages/Auth';
 import AuthCallback from './pages/AuthCallback';
+import RoleSelection from './pages/RoleSelection';
 import ForgotPassword from './pages/ForgotPassword';
 import Dashboard from './pages/Dashboard';
 import HiringPortal from './pages/HiringPortal';
