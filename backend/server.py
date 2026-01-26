@@ -381,6 +381,12 @@ async def get_current_user(request: Request, authorization: str = Header(None)):
     return user
 
 # Google OAuth Routes
+@api_router.post("/auth/google/check-user")
+async def check_google_user(email: EmailStr):
+    """Check if user with email already exists"""
+    user = await db.users.find_one({"email": email}, {"_id": 0})
+    return {"exists": user is not None}
+
 @api_router.post("/auth/google/session")
 async def google_session(request: Request, response: Response, x_session_id: str = Header(None, alias="X-Session-ID")):
     """Exchange session_id from Google OAuth for user data and session_token"""
@@ -389,6 +395,10 @@ async def google_session(request: Request, response: Response, x_session_id: str
         raise HTTPException(status_code=400, detail="X-Session-ID header required")
     
     try:
+        # Get role from request body (for new users)
+        body = await request.json() if request.headers.get('content-length') else {}
+        selected_role = body.get('role')
+        
         # Call Emergent's OAuth API to get user data
         emergent_response = requests.get(
             "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
@@ -427,12 +437,16 @@ async def google_session(request: Request, response: Response, x_session_id: str
         else:
             # Create new user with Google OAuth
             user_id = str(uuid.uuid4())
+            
+            # Use selected role or default to job_seeker
+            user_role = selected_role if selected_role in ['startup', 'job_seeker', 'mentor', 'mentee'] else 'job_seeker'
+            
             user_doc = {
                 "id": user_id,
                 "email": email,
                 "full_name": name,
                 "picture": picture,
-                "role": "job_seeker",  # Default role
+                "role": user_role,
                 "created_at": datetime.now(timezone.utc).isoformat(),
                 "profile_complete": False,
                 "oauth_provider": "google"
