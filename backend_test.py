@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 
 class StartupConnectAPITester:
-    def __init__(self, base_url="https://startwise-portal.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://preview-mode-51.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.tokens = {}  # Store tokens for different users
         self.user_ids = {}  # Store user IDs for different roles
