@@ -170,10 +170,10 @@ export default function AdminDashboard() {
           <div className="flex items-center justify-between"> 
             <div className="flex items-center gap-3"> 
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-red-500 flex items-center justify-center"> 
-                <Shield className="w-5 h-5 text-white\" />
+                <Shield className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-white\" style={{ fontFamily: 'Outfit' }}>
+                <h1 className="text-xl font-bold text-white" style={{ fontFamily: 'Outfit' }}>
                   Admin Portal
                 </h1>
                 <p className="text-xs text-slate-400"> BharatVapari Platform</p>
@@ -182,18 +182,18 @@ export default function AdminDashboard() {
 
             <div className="flex items-center gap-4"> 
               <Link
-                to=\"/\"
-                className="text-slate-300 hover:text-white transition-colors text-sm\"
+                to="/"
+                className="text-slate-300 hover:text-white transition-colors text-sm"
               >
                 View Main Site
               </Link>
               <Button
                 onClick={handleLogout}
-                variant=\"ghost\"
-                className="text-slate-300 hover:text-red-400\"
-                data-testid=\"admin-logout-button\"
+                variant="ghost"
+                className="text-slate-300 hover:text-red-400"
+                data-testid="admin-logout-button"
               >
-                <LogOut className="w-5 h-5\" />
+                <LogOut className="w-5 h-5" />
               </Button>
             </div>
           </div>
@@ -210,9 +210,9 @@ export default function AdminDashboard() {
                 ? 'text-amber-500 border-b-2 border-amber-500'
                 : 'text-slate-400 hover:text-white'
             }`}
-            data-testid=\"tab-overview\"
+            data-testid="tab-overview"
           >
-            <BarChart3 className="w-5 h-5 inline mr-2\" />
+            <BarChart3 className="w-5 h-5 inline mr-2" />
             Overview
           </button>
           <button
@@ -222,9 +222,9 @@ export default function AdminDashboard() {
                 ? 'text-amber-500 border-b-2 border-amber-500'
                 : 'text-slate-400 hover:text-white'
             }`}
-            data-testid=\"tab-requests\"
+            data-testid="tab-requests"
           >
-            <Shield className="w-5 h-5 inline mr-2\" />
+            <Shield className="w-5 h-5 inline mr-2" />
             Admin Requests
             {pendingRequests.length > 0 && (
               <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center"> 
@@ -239,9 +239,9 @@ export default function AdminDashboard() {
                 ? 'text-amber-500 border-b-2 border-amber-500'
                 : 'text-slate-400 hover:text-white'
             }`}
-            data-testid=\"tab-users\"
+            data-testid="tab-users"
           >
-            <Users className="w-5 h-5 inline mr-2\" />
+            <Users className="w-5 h-5 inline mr-2" />
             Users
           </button>
           <button
@@ -251,9 +251,9 @@ export default function AdminDashboard() {
                 ? 'text-amber-500 border-b-2 border-amber-500'
                 : 'text-slate-400 hover:text-white'
             }`}
-            data-testid=\"tab-jobs\"
+            data-testid="tab-jobs"
           >
-            <Briefcase className="w-5 h-5 inline mr-2\" />
+            <Briefcase className="w-5 h-5 inline mr-2" />
             Jobs
           </button>
         </div>
@@ -261,7 +261,7 @@ export default function AdminDashboard() {
         {/* Overview Tab */}
         {activeTab === 'overview' && (
           <div>
-            <h2 className="text-2xl font-bold text-white mb-6\" style={{ fontFamily: 'Outfit' }}>
+            <h2 className="text-2xl font-bold text-white mb-6" style={{ fontFamily: 'Outfit' }}>
               Platform Statistics
             </h2>
 
@@ -269,7 +269,7 @@ export default function AdminDashboard() {
             <div className="grid md:grid-cols-4 gap-6 mb-8"> 
               <Card className="p-6 bg-slate-800 border-slate-700"> 
                 <div className="flex items-center justify-between mb-4"> 
-                  <Users className="w-8 h-8 text-indigo-400\" />
+                  <Users className="w-8 h-8 text-indigo-400" />
                   <span className="text-green-400 text-sm"> Active</span>
                 </div>
                 <div className="text-3xl font-bold text-white mb-1"> {stats?.users?.total || 0}</div>
@@ -278,7 +278,7 @@ export default function AdminDashboard() {
 
               <Card className="p-6 bg-slate-800 border-slate-700"> 
                 <div className="flex items-center justify-between mb-4"> 
-                  <Briefcase className="w-8 h-8 text-amber-400\" />
+                  <Briefcase className="w-8 h-8 text-amber-400" />
                   <span className="text-blue-400 text-sm"> Live</span>
                 </div>
                 <div className="text-3xl font-bold text-white mb-1"> {stats?.hiring?.active_jobs || 0}</div>
@@ -287,7 +287,7 @@ export default function AdminDashboard() {
 
               <Card className="p-6 bg-slate-800 border-slate-700"> 
                 <div className="flex items-center justify-between mb-4"> 
-                  <GraduationCap className="w-8 h-8 text-teal-400\" />
+                  <GraduationCap className="w-8 h-8 text-teal-400" />
                   <span className="text-purple-400 text-sm"> Available</span>
                 </div>
                 <div className="text-3xl font-bold text-white mb-1"> {stats?.mentorship?.total_mentors || 0}</div>
@@ -296,7 +296,7 @@ export default function AdminDashboard() {
 
               <Card className="p-6 bg-slate-800 border-slate-700"> 
                 <div className="flex items-center justify-between mb-4"> 
-                  <MessageCircle className="w-8 h-8 text-green-400\" />
+                  <MessageCircle className="w-8 h-8 text-green-400" />
                   <span className="text-yellow-400 text-sm"> Sent</span>
                 </div>
                 <div className="text-3xl font-bold text-white mb-1"> {stats?.engagement?.total_messages || 0}</div>
@@ -352,13 +352,13 @@ export default function AdminDashboard() {
         {/* Admin Requests Tab */}
         {activeTab === 'requests' && (
           <div>
-            <h2 className="text-2xl font-bold text-white mb-6\" style={{ fontFamily: 'Outfit' }}>
+            <h2 className="text-2xl font-bold text-white mb-6" style={{ fontFamily: 'Outfit' }}>
               Admin Access Requests
             </h2>
 
             {pendingRequests.length === 0 ? (
               <Card className="p-12 bg-slate-800 border-slate-700 text-center"> 
-                <Shield className="w-16 h-16 text-slate-600 mx-auto mb-4\" />
+                <Shield className="w-16 h-16 text-slate-600 mx-auto mb-4" />
                 <p className="text-slate-400"> No pending admin requests</p>
               </Card>
             ) : (
@@ -394,14 +394,14 @@ export default function AdminDashboard() {
                               setSelectedRequest(request);
                               setShowApprovalModal(true);
                             }}
-                            className="bg-green-600 hover:bg-green-700 text-white\"
+                            className="bg-green-600 hover:bg-green-700 text-white"
                             data-testid={`approve-request-${request.id}`}
                           >
                             Approve
                           </Button>
                           <Button
                             onClick={() => handleRejectRequest(request.id)}
-                            variant=\"destructive\"
+                            variant="destructive"
                             data-testid={`reject-request-${request.id}`}
                           >
                             Reject
@@ -425,12 +425,12 @@ export default function AdminDashboard() {
                   <div className="mb-6"> 
                     <Label className="text-slate-300 mb-2 block"> Set Temporary Password</Label>
                     <Input
-                      type=\"text\"
+                      type="text"
                       value={tempPassword}
                       onChange={(e) => setTempPassword(e.target.value)}
-                      placeholder=\"Enter temporary password\"
-                      className="bg-slate-700 border-slate-600 text-white\"
-                      data-testid=\"temp-password-input\"
+                      placeholder="Enter temporary password"
+                      className="bg-slate-700 border-slate-600 text-white"
+                      data-testid="temp-password-input"
                     />
                     <p className="text-xs text-slate-500 mt-2"> 
                       Share this password securely with the new admin. They should change it after first login.
@@ -439,8 +439,8 @@ export default function AdminDashboard() {
                   <div className="flex gap-3"> 
                     <Button
                       onClick={handleApproveRequest}
-                      className="flex-1 bg-green-600 hover:bg-green-700\"
-                      data-testid=\"confirm-approve-button\"
+                      className="flex-1 bg-green-600 hover:bg-green-700"
+                      data-testid="confirm-approve-button"
                     >
                       Confirm Approval
                     </Button>
@@ -450,8 +450,8 @@ export default function AdminDashboard() {
                         setSelectedRequest(null);
                         setTempPassword('');
                       }}
-                      variant=\"outline\"
-                      className="flex-1 border-slate-600\"
+                      variant="outline"
+                      className="flex-1 border-slate-600"
                     >
                       Cancel
                     </Button>
@@ -466,17 +466,17 @@ export default function AdminDashboard() {
         {activeTab === 'users' && (
           <div>
             <div className="flex justify-between items-center mb-6"> 
-              <h2 className="text-2xl font-bold text-white\" style={{ fontFamily: 'Outfit' }}>
+              <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Outfit' }}>
                 Manage Users
               </h2>
               <div className="relative"> 
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400\" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <Input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder=\"Search users...\"
-                  className="pl-10 bg-slate-800 border-slate-700 text-white w-64\"
-                  data-testid=\"search-users-input\"
+                  placeholder="Search users..."
+                  className="pl-10 bg-slate-800 border-slate-700 text-white w-64"
+                  data-testid="search-users-input"
                 />
               </div>
             </div>
@@ -525,11 +525,11 @@ export default function AdminDashboard() {
                         <td className="px-6 py-4 whitespace-nowrap"> 
                           <Button
                             onClick={() => handleDeleteUser(user.id)}
-                            variant=\"ghost\"
-                            className="text-red-400 hover:text-red-300 hover:bg-red-900/20\"
+                            variant="ghost"
+                            className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
                             data-testid={`delete-user-${user.id}`}
                           >
-                            <Trash2 className="w-4 h-4\" />
+                            <Trash2 className="w-4 h-4" />
                           </Button>
                         </td>
                       </tr>
@@ -544,7 +544,7 @@ export default function AdminDashboard() {
         {/* Jobs Tab */}
         {activeTab === 'jobs' && (
           <div>
-            <h2 className="text-2xl font-bold text-white mb-6\" style={{ fontFamily: 'Outfit' }}>
+            <h2 className="text-2xl font-bold text-white mb-6" style={{ fontFamily: 'Outfit' }}>
               Manage Jobs
             </h2>
 
@@ -604,11 +604,11 @@ export default function AdminDashboard() {
                         <td className="px-6 py-4"> 
                           <Button
                             onClick={() => handleDeleteJob(job.id)}
-                            variant=\"ghost\"
-                            className="text-red-400 hover:text-red-300 hover:bg-red-900/20\"
+                            variant="ghost"
+                            className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
                             data-testid={`delete-job-${job.id}`}
                           >
-                            <Trash2 className="w-4 h-4\" />
+                            <Trash2 className="w-4 h-4" />
                           </Button>
                         </td>
                       </tr>
