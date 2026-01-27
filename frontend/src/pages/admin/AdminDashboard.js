@@ -156,31 +156,31 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center\">
-        <div className="text-white\">Loading admin panel...</div>
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center"> 
+        <div className="text-white"> Loading admin panel...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-900\">
+    <div className="min-h-screen bg-slate-900"> 
       {/* Admin Navbar */}
-      <nav className="bg-slate-800 border-b border-slate-700 sticky top-0 z-50\">
-        <div className="max-w-7xl mx-auto px-6 py-4\">
-          <div className="flex items-center justify-between\">
-            <div className="flex items-center gap-3\">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-red-500 flex items-center justify-center\">
+      <nav className="bg-slate-800 border-b border-slate-700 sticky top-0 z-50"> 
+        <div className="max-w-7xl mx-auto px-6 py-4"> 
+          <div className="flex items-center justify-between"> 
+            <div className="flex items-center gap-3"> 
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-red-500 flex items-center justify-center"> 
                 <Shield className="w-5 h-5 text-white\" />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-white\" style={{ fontFamily: 'Outfit' }}>
                   Admin Portal
                 </h1>
-                <p className="text-xs text-slate-400\">BharatVapari Platform</p>
+                <p className="text-xs text-slate-400"> BharatVapari Platform</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-4\">
+            <div className="flex items-center gap-4"> 
               <Link
                 to=\"/\"
                 className="text-slate-300 hover:text-white transition-colors text-sm\"
@@ -200,9 +200,9 @@ export default function AdminDashboard() {
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto px-6 py-8\">
+      <div className="max-w-7xl mx-auto px-6 py-8"> 
         {/* Tab Navigation */}
-        <div className="flex gap-4 mb-8 border-b border-slate-700\">
+        <div className="flex gap-4 mb-8 border-b border-slate-700"> 
           <button
             onClick={() => setActiveTab('overview')}
             className={`px-4 py-3 font-medium transition-colors ${
@@ -227,7 +227,7 @@ export default function AdminDashboard() {
             <Shield className="w-5 h-5 inline mr-2\" />
             Admin Requests
             {pendingRequests.length > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center\">
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center"> 
                 {pendingRequests.length}
               </span>
             )}
@@ -266,82 +266,82 @@ export default function AdminDashboard() {
             </h2>
 
             {/* Stats Grid */}
-            <div className="grid md:grid-cols-4 gap-6 mb-8\">
-              <Card className="p-6 bg-slate-800 border-slate-700\">
-                <div className="flex items-center justify-between mb-4\">
+            <div className="grid md:grid-cols-4 gap-6 mb-8"> 
+              <Card className="p-6 bg-slate-800 border-slate-700"> 
+                <div className="flex items-center justify-between mb-4"> 
                   <Users className="w-8 h-8 text-indigo-400\" />
-                  <span className="text-green-400 text-sm\">Active</span>
+                  <span className="text-green-400 text-sm"> Active</span>
                 </div>
-                <div className="text-3xl font-bold text-white mb-1\">{stats?.users?.total || 0}</div>
-                <div className="text-sm text-slate-400\">Total Users</div>
+                <div className="text-3xl font-bold text-white mb-1"> {stats?.users?.total || 0}</div>
+                <div className="text-sm text-slate-400"> Total Users</div>
               </Card>
 
-              <Card className="p-6 bg-slate-800 border-slate-700\">
-                <div className="flex items-center justify-between mb-4\">
+              <Card className="p-6 bg-slate-800 border-slate-700"> 
+                <div className="flex items-center justify-between mb-4"> 
                   <Briefcase className="w-8 h-8 text-amber-400\" />
-                  <span className="text-blue-400 text-sm\">Live</span>
+                  <span className="text-blue-400 text-sm"> Live</span>
                 </div>
-                <div className="text-3xl font-bold text-white mb-1\">{stats?.hiring?.active_jobs || 0}</div>
-                <div className="text-sm text-slate-400\">Active Jobs</div>
+                <div className="text-3xl font-bold text-white mb-1"> {stats?.hiring?.active_jobs || 0}</div>
+                <div className="text-sm text-slate-400"> Active Jobs</div>
               </Card>
 
-              <Card className="p-6 bg-slate-800 border-slate-700\">
-                <div className="flex items-center justify-between mb-4\">
+              <Card className="p-6 bg-slate-800 border-slate-700"> 
+                <div className="flex items-center justify-between mb-4"> 
                   <GraduationCap className="w-8 h-8 text-teal-400\" />
-                  <span className="text-purple-400 text-sm\">Available</span>
+                  <span className="text-purple-400 text-sm"> Available</span>
                 </div>
-                <div className="text-3xl font-bold text-white mb-1\">{stats?.mentorship?.total_mentors || 0}</div>
-                <div className="text-sm text-slate-400\">Mentors</div>
+                <div className="text-3xl font-bold text-white mb-1"> {stats?.mentorship?.total_mentors || 0}</div>
+                <div className="text-sm text-slate-400"> Mentors</div>
               </Card>
 
-              <Card className="p-6 bg-slate-800 border-slate-700\">
-                <div className="flex items-center justify-between mb-4\">
+              <Card className="p-6 bg-slate-800 border-slate-700"> 
+                <div className="flex items-center justify-between mb-4"> 
                   <MessageCircle className="w-8 h-8 text-green-400\" />
-                  <span className="text-yellow-400 text-sm\">Sent</span>
+                  <span className="text-yellow-400 text-sm"> Sent</span>
                 </div>
-                <div className="text-3xl font-bold text-white mb-1\">{stats?.engagement?.total_messages || 0}</div>
-                <div className="text-sm text-slate-400\">Messages</div>
+                <div className="text-3xl font-bold text-white mb-1"> {stats?.engagement?.total_messages || 0}</div>
+                <div className="text-sm text-slate-400"> Messages</div>
               </Card>
             </div>
 
             {/* User Breakdown */}
-            <div className="grid md:grid-cols-2 gap-6\">
-              <Card className="p-6 bg-slate-800 border-slate-700\">
-                <h3 className="text-lg font-semibold text-white mb-4\">User Distribution</h3>
-                <div className="space-y-3\">
-                  <div className="flex justify-between items-center\">
-                    <span className="text-slate-400\">Startups</span>
-                    <span className="text-white font-semibold\">{stats?.users?.startups || 0}</span>
+            <div className="grid md:grid-cols-2 gap-6"> 
+              <Card className="p-6 bg-slate-800 border-slate-700"> 
+                <h3 className="text-lg font-semibold text-white mb-4"> User Distribution</h3>
+                <div className="space-y-3"> 
+                  <div className="flex justify-between items-center"> 
+                    <span className="text-slate-400"> Startups</span>
+                    <span className="text-white font-semibold"> {stats?.users?.startups || 0}</span>
                   </div>
-                  <div className="flex justify-between items-center\">
-                    <span className="text-slate-400\">Job Seekers</span>
-                    <span className="text-white font-semibold\">{stats?.users?.job_seekers || 0}</span>
+                  <div className="flex justify-between items-center"> 
+                    <span className="text-slate-400"> Job Seekers</span>
+                    <span className="text-white font-semibold"> {stats?.users?.job_seekers || 0}</span>
                   </div>
-                  <div className="flex justify-between items-center\">
-                    <span className="text-slate-400\">Mentors</span>
-                    <span className="text-white font-semibold\">{stats?.users?.mentors || 0}</span>
+                  <div className="flex justify-between items-center"> 
+                    <span className="text-slate-400"> Mentors</span>
+                    <span className="text-white font-semibold"> {stats?.users?.mentors || 0}</span>
                   </div>
-                  <div className="flex justify-between items-center\">
-                    <span className="text-slate-400\">Mentees</span>
-                    <span className="text-white font-semibold\">{stats?.users?.mentees || 0}</span>
+                  <div className="flex justify-between items-center"> 
+                    <span className="text-slate-400"> Mentees</span>
+                    <span className="text-white font-semibold"> {stats?.users?.mentees || 0}</span>
                   </div>
                 </div>
               </Card>
 
-              <Card className="p-6 bg-slate-800 border-slate-700\">
-                <h3 className="text-lg font-semibold text-white mb-4\">Platform Activity</h3>
-                <div className="space-y-3\">
-                  <div className="flex justify-between items-center\">
-                    <span className="text-slate-400\">Total Applications</span>
-                    <span className="text-white font-semibold\">{stats?.hiring?.total_applications || 0}</span>
+              <Card className="p-6 bg-slate-800 border-slate-700"> 
+                <h3 className="text-lg font-semibold text-white mb-4"> Platform Activity</h3>
+                <div className="space-y-3"> 
+                  <div className="flex justify-between items-center"> 
+                    <span className="text-slate-400"> Total Applications</span>
+                    <span className="text-white font-semibold"> {stats?.hiring?.total_applications || 0}</span>
                   </div>
-                  <div className="flex justify-between items-center\">
-                    <span className="text-slate-400\">Mentorship Sessions</span>
-                    <span className="text-white font-semibold\">{stats?.mentorship?.total_sessions || 0}</span>
+                  <div className="flex justify-between items-center"> 
+                    <span className="text-slate-400"> Mentorship Sessions</span>
+                    <span className="text-white font-semibold"> {stats?.mentorship?.total_sessions || 0}</span>
                   </div>
-                  <div className="flex justify-between items-center\">
-                    <span className="text-slate-400\">Total Jobs Posted</span>
-                    <span className="text-white font-semibold\">{stats?.hiring?.total_jobs || 0}</span>
+                  <div className="flex justify-between items-center"> 
+                    <span className="text-slate-400"> Total Jobs Posted</span>
+                    <span className="text-white font-semibold"> {stats?.hiring?.total_jobs || 0}</span>
                   </div>
                 </div>
               </Card>
@@ -357,18 +357,18 @@ export default function AdminDashboard() {
             </h2>
 
             {pendingRequests.length === 0 ? (
-              <Card className="p-12 bg-slate-800 border-slate-700 text-center\">
+              <Card className="p-12 bg-slate-800 border-slate-700 text-center"> 
                 <Shield className="w-16 h-16 text-slate-600 mx-auto mb-4\" />
-                <p className="text-slate-400\">No pending admin requests</p>
+                <p className="text-slate-400"> No pending admin requests</p>
               </Card>
             ) : (
-              <div className="space-y-4\">
+              <div className="space-y-4"> 
                 {adminRequests.map((request) => (
-                  <Card key={request.id} className="p-6 bg-slate-800 border-slate-700\">
-                    <div className="flex items-start justify-between\">
-                      <div className="flex-1\">
-                        <div className="flex items-center gap-3 mb-3\">
-                          <h3 className="text-lg font-semibold text-white\">{request.full_name}</h3>
+                  <Card key={request.id} className="p-6 bg-slate-800 border-slate-700"> 
+                    <div className="flex items-start justify-between"> 
+                      <div className="flex-1"> 
+                        <div className="flex items-center gap-3 mb-3"> 
+                          <h3 className="text-lg font-semibold text-white"> {request.full_name}</h3>
                           <span className={`px-3 py-1 text-xs font-medium rounded-full ${
                             request.status === 'pending' ? 'bg-yellow-900 text-yellow-300' :
                             request.status === 'approved' ? 'bg-green-900 text-green-300' :
@@ -377,18 +377,18 @@ export default function AdminDashboard() {
                             {request.status}
                           </span>
                         </div>
-                        <p className="text-slate-300 mb-2\">{request.email}</p>
-                        <div className="bg-slate-700/50 rounded-lg p-4 mb-3\">
-                          <p className="text-sm text-slate-400 mb-1\">Reason:</p>
-                          <p className="text-sm text-white\">{request.reason}</p>
+                        <p className="text-slate-300 mb-2"> {request.email}</p>
+                        <div className="bg-slate-700/50 rounded-lg p-4 mb-3"> 
+                          <p className="text-sm text-slate-400 mb-1"> Reason:</p>
+                          <p className="text-sm text-white"> {request.reason}</p>
                         </div>
-                        <p className="text-xs text-slate-500\">
+                        <p className="text-xs text-slate-500"> 
                           Requested: {new Date(request.created_at).toLocaleString()}
                         </p>
                       </div>
                       
                       {request.status === 'pending' && (
-                        <div className="flex gap-2 ml-4\">
+                        <div className="flex gap-2 ml-4"> 
                           <Button
                             onClick={() => {
                               setSelectedRequest(request);
@@ -416,14 +416,14 @@ export default function AdminDashboard() {
 
             {/* Approval Modal */}
             {showApprovalModal && selectedRequest && (
-              <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-6\">
-                <Card className="w-full max-w-md p-6 bg-slate-800 border-slate-700\">
-                  <h3 className="text-xl font-bold text-white mb-4\">Approve Admin Access</h3>
-                  <p className="text-slate-300 mb-4\">
+              <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-6"> 
+                <Card className="w-full max-w-md p-6 bg-slate-800 border-slate-700"> 
+                  <h3 className="text-xl font-bold text-white mb-4"> Approve Admin Access</h3>
+                  <p className="text-slate-300 mb-4"> 
                     Approve admin access for <strong>{selectedRequest.email}</strong>?
                   </p>
-                  <div className="mb-6\">
-                    <Label className="text-slate-300 mb-2 block\">Set Temporary Password</Label>
+                  <div className="mb-6"> 
+                    <Label className="text-slate-300 mb-2 block"> Set Temporary Password</Label>
                     <Input
                       type=\"text\"
                       value={tempPassword}
@@ -432,11 +432,11 @@ export default function AdminDashboard() {
                       className="bg-slate-700 border-slate-600 text-white\"
                       data-testid=\"temp-password-input\"
                     />
-                    <p className="text-xs text-slate-500 mt-2\">
+                    <p className="text-xs text-slate-500 mt-2"> 
                       Share this password securely with the new admin. They should change it after first login.
                     </p>
                   </div>
-                  <div className="flex gap-3\">
+                  <div className="flex gap-3"> 
                     <Button
                       onClick={handleApproveRequest}
                       className="flex-1 bg-green-600 hover:bg-green-700\"
@@ -465,11 +465,11 @@ export default function AdminDashboard() {
         {/* Users Tab */}
         {activeTab === 'users' && (
           <div>
-            <div className="flex justify-between items-center mb-6\">
+            <div className="flex justify-between items-center mb-6"> 
               <h2 className="text-2xl font-bold text-white\" style={{ fontFamily: 'Outfit' }}>
                 Manage Users
               </h2>
-              <div className="relative\">
+              <div className="relative"> 
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400\" />
                 <Input
                   value={searchQuery}
@@ -481,48 +481,48 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <Card className="bg-slate-800 border-slate-700\">
-              <div className="overflow-x-auto\">
-                <table className="w-full\">
-                  <thead className="bg-slate-700\">
+            <Card className="bg-slate-800 border-slate-700"> 
+              <div className="overflow-x-auto"> 
+                <table className="w-full"> 
+                  <thead className="bg-slate-700"> 
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider\">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider"> 
                         User
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider\">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider"> 
                         Email
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider\">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider"> 
                         Role
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider\">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider"> 
                         Joined
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider\">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider"> 
                         Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-700\">
+                  <tbody className="divide-y divide-slate-700"> 
                     {filteredUsers.map((user) => (
-                      <tr key={user.id} className="hover:bg-slate-750\">
-                        <td className="px-6 py-4 whitespace-nowrap\">
-                          <div className="text-sm font-medium text-white\">{user.full_name}</div>
+                      <tr key={user.id} className="hover:bg-slate-750"> 
+                        <td className="px-6 py-4 whitespace-nowrap"> 
+                          <div className="text-sm font-medium text-white"> {user.full_name}</div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap\">
-                          <div className="text-sm text-slate-300\">{user.email}</div>
+                        <td className="px-6 py-4 whitespace-nowrap"> 
+                          <div className="text-sm text-slate-300"> {user.email}</div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap\">
-                          <span className="px-2 py-1 text-xs font-medium rounded-full bg-indigo-900 text-indigo-300\">
+                        <td className="px-6 py-4 whitespace-nowrap"> 
+                          <span className="px-2 py-1 text-xs font-medium rounded-full bg-indigo-900 text-indigo-300"> 
                             {user.role}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap\">
-                          <div className="text-sm text-slate-400\">
+                        <td className="px-6 py-4 whitespace-nowrap"> 
+                          <div className="text-sm text-slate-400"> 
                             {new Date(user.created_at).toLocaleDateString()}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap\">
+                        <td className="px-6 py-4 whitespace-nowrap"> 
                           <Button
                             onClick={() => handleDeleteUser(user.id)}
                             variant=\"ghost\"
@@ -548,44 +548,44 @@ export default function AdminDashboard() {
               Manage Jobs
             </h2>
 
-            <Card className="bg-slate-800 border-slate-700\">
-              <div className="overflow-x-auto\">
-                <table className="w-full\">
-                  <thead className="bg-slate-700\">
+            <Card className="bg-slate-800 border-slate-700"> 
+              <div className="overflow-x-auto"> 
+                <table className="w-full"> 
+                  <thead className="bg-slate-700"> 
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider\">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider"> 
                         Title
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider\">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider"> 
                         Company
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider\">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider"> 
                         Location
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider\">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider"> 
                         Status
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider\">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider"> 
                         Posted
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider\">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider"> 
                         Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-700\">
+                  <tbody className="divide-y divide-slate-700"> 
                     {jobs.map((job) => (
-                      <tr key={job.id} className="hover:bg-slate-750\">
-                        <td className="px-6 py-4\">
-                          <div className="text-sm font-medium text-white\">{job.title}</div>
+                      <tr key={job.id} className="hover:bg-slate-750"> 
+                        <td className="px-6 py-4"> 
+                          <div className="text-sm font-medium text-white"> {job.title}</div>
                         </td>
-                        <td className="px-6 py-4\">
-                          <div className="text-sm text-slate-300\">{job.company}</div>
+                        <td className="px-6 py-4"> 
+                          <div className="text-sm text-slate-300"> {job.company}</div>
                         </td>
-                        <td className="px-6 py-4\">
-                          <div className="text-sm text-slate-400\">{job.location}</div>
+                        <td className="px-6 py-4"> 
+                          <div className="text-sm text-slate-400"> {job.location}</div>
                         </td>
-                        <td className="px-6 py-4\">
+                        <td className="px-6 py-4"> 
                           <span
                             className={`px-2 py-1 text-xs font-medium rounded-full ${
                               job.status === 'active'
@@ -596,12 +596,12 @@ export default function AdminDashboard() {
                             {job.status}
                           </span>
                         </td>
-                        <td className="px-6 py-4\">
-                          <div className="text-sm text-slate-400\">
+                        <td className="px-6 py-4"> 
+                          <div className="text-sm text-slate-400"> 
                             {new Date(job.created_at).toLocaleDateString()}
                           </div>
                         </td>
-                        <td className="px-6 py-4\">
+                        <td className="px-6 py-4"> 
                           <Button
                             onClick={() => handleDeleteJob(job.id)}
                             variant=\"ghost\"
