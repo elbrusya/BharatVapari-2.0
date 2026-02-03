@@ -91,6 +91,7 @@ class User(BaseModel):
 # Profile Models
 class UserProfile(BaseModel):
     # Common fields
+    full_name: Optional[str] = None  # Editable name field
     bio: Optional[str] = None
     skills: Optional[List[str]] = []
     location: Optional[str] = None
