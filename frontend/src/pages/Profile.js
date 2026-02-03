@@ -159,6 +159,22 @@ export default function Profile() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Common Fields for All Roles */}
             <div>
+              <Label htmlFor="full_name" className="text-sm font-medium flex items-center gap-2">
+                <User className="w-4 h-4" />
+                Full Name <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="full_name"
+                data-testid="profile-name-input"
+                value={profile.full_name}
+                onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
+                required
+                placeholder="Enter your full name"
+                className="mt-2 rounded-xl"
+              />
+            </div>
+
+            <div>
               <Label htmlFor="linkedin" className="text-sm font-medium flex items-center gap-2">
                 <Linkedin className="w-4 h-4" />
                 LinkedIn Profile <span className="text-red-500">*</span>
