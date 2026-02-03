@@ -29,6 +29,7 @@ export default function Profile() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState({
+    full_name: '',
     bio: '',
     skills: '',
     location: '',
