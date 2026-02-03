@@ -54,6 +54,7 @@ export default function Profile() {
   useEffect(() => {
     if (user) {
       setProfile({
+        full_name: user.full_name || '',
         bio: user.bio || '',
         skills: user.skills?.join(', ') || '',
         location: user.location || '',
