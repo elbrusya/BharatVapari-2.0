@@ -374,31 +374,126 @@ export default function Landing() {
       </section>
 
       {/* CTA Section */}
-      <div className="max-w-7xl mx-auto px-6 py-24">
-        <div className="gradient-bg rounded-3xl p-12 md:p-16 text-center">
-          <MessageCircle className="w-16 h-16 text-white mx-auto mb-6" />
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6" style={{ fontFamily: 'Outfit' }}>
-            Start Building Today
-          </h2>
-          <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-            Join the vibrant community of Indian startups. Whether you're hiring, seeking
-            mentorship, or looking for your next opportunity.
-          </p>
-          <Link to="/auth">
-            <Button
-              data-testid="cta-join-button"
-              className="rounded-full px-10 py-7 bg-white hover:bg-slate-100 text-indigo-600 font-bold shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all text-lg"
-            >
-              Join BharatVapari
-            </Button>
-          </Link>
+      <section className="py-24 bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 relative overflow-hidden">
+        {/* Decorative elements */}
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500 rounded-full filter blur-3xl opacity-20"></div>
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500 rounded-full filter blur-3xl opacity-20"></div>
+        
+        <div className="max-w-5xl mx-auto px-6 text-center relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-2 glass-dark rounded-full mb-6">
+              <Sparkles className="w-4 h-4 text-blue-400" />
+              <span className="text-blue-300 font-semibold text-sm">Join 60,000+ Members</span>
+            </div>
+            
+            <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight" style={{ fontFamily: 'Outfit' }}>
+              Ready to Build the Future?
+            </h2>
+            
+            <p className="text-xl text-slate-300 mb-10 max-w-2xl mx-auto leading-relaxed">
+              Whether you're hiring talent, seeking mentorship, or looking for your next opportunity, 
+              BharatVapari has everything you need to succeed.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/auth">
+                <Button
+                  data-testid="cta-join-button"
+                  className="rounded-2xl px-10 py-7 bg-white hover:bg-slate-100 text-blue-600 font-bold shadow-2xl hover:shadow-3xl hover:-translate-y-1 transition-all text-lg group"
+                >
+                  Join BharatVapari
+                  <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+              <Button
+                variant="outline"
+                className="rounded-2xl px-10 py-7 border-2 border-white/30 hover:border-white/50 bg-white/10 hover:bg-white/20 text-white font-bold text-lg backdrop-blur-xl transition-all"
+              >
+                View Demo
+              </Button>
+            </div>
+
+            {/* Trust indicators */}
+            <div className="mt-12 flex flex-wrap justify-center items-center gap-8 text-slate-400">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-green-400" />
+                <span>Free to join</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-green-400" />
+                <span>No credit card required</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-green-400" />
+                <span>Setup in 2 minutes</span>
+              </div>
+            </div>
+          </motion.div>
         </div>
-      </div>
+      </section>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200 py-8">
-        <div className="max-w-7xl mx-auto px-6 text-center text-slate-600">
-          <p>© 2024 BharatVapari. Built for the Indian startup ecosystem.</p>
+      <footer className="bg-slate-900 border-t border-slate-800 py-12">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
+            {/* Brand */}
+            <div className="md:col-span-2">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shadow-lg">
+                  <Sparkles className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-2xl font-bold text-white" style={{ fontFamily: 'Outfit' }}>
+                  BharatVapari
+                </span>
+              </div>
+              <p className="text-slate-400 mb-4 max-w-sm">
+                India's leading platform connecting startups with talent, mentors, and opportunities.
+              </p>
+              <div className="flex gap-3">
+                <div className="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 flex items-center justify-center cursor-pointer transition-colors">
+                  <svg className="w-5 h-5 text-slate-400" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
+                  </svg>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 flex items-center justify-center cursor-pointer transition-colors">
+                  <svg className="w-5 h-5 text-slate-400" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            {/* Links */}
+            <div>
+              <h4 className="text-white font-semibold mb-4">Platform</h4>
+              <ul className="space-y-2">
+                <li><a href="#" className="text-slate-400 hover:text-white transition-colors">Hiring Portal</a></li>
+                <li><a href="#" className="text-slate-400 hover:text-white transition-colors">Mentorship</a></li>
+                <li><a href="#" className="text-slate-400 hover:text-white transition-colors">For Startups</a></li>
+                <li><a href="#" className="text-slate-400 hover:text-white transition-colors">For Job Seekers</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-white font-semibold mb-4">Company</h4>
+              <ul className="space-y-2">
+                <li><a href="#" className="text-slate-400 hover:text-white transition-colors">About Us</a></li>
+                <li><a href="#" className="text-slate-400 hover:text-white transition-colors">Contact</a></li>
+                <li><a href="#" className="text-slate-400 hover:text-white transition-colors">Privacy Policy</a></li>
+                <li><a href="#" className="text-slate-400 hover:text-white transition-colors">Terms of Service</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="border-t border-slate-800 pt-8 text-center">
+            <p className="text-slate-500">
+              © 2025 BharatVapari. Built with ❤️ for the Indian startup ecosystem.
+            </p>
+          </div>
         </div>
       </footer>
     </div>
