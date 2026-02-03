@@ -182,79 +182,196 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <div className="max-w-7xl mx-auto px-6 py-24">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-semibold mb-4" style={{ fontFamily: 'Outfit' }}>
-            Two Powerful Portals
-          </h2>
-          <p className="text-lg text-slate-600">Everything you need to succeed in one platform</p>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-8">
-          {/* Hiring Portal Card */}
-          <motion.div
-            whileHover={{ y: -8 }}
-            className="p-8 rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-xl transition-all duration-300"
+      {/* Features Grid - Bento Style */}
+      <section className="py-24 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-6">
+          <motion.div 
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
           >
-            <div className="w-16 h-16 rounded-2xl bg-indigo-100 flex items-center justify-center mb-6">
-              <Briefcase className="w-8 h-8 text-indigo-600" />
+            <div className="inline-block px-4 py-2 bg-blue-100 rounded-full mb-4">
+              <span className="text-blue-700 font-semibold text-sm">PLATFORM FEATURES</span>
             </div>
-            <h3 className="text-2xl font-semibold mb-4" style={{ fontFamily: 'Outfit' }}>
-              Hiring Portal
-            </h3>
-            <p className="text-slate-600 mb-6 leading-relaxed">
-              Post jobs, discover talent, and build your dream team. AI-powered matching ensures
-              you find the perfect candidates for your startup.
+            <h2 className="text-4xl md:text-5xl font-bold mb-4" style={{ fontFamily: 'Outfit' }}>
+              Everything You Need to{' '}
+              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Succeed
+              </span>
+            </h2>
+            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+              Two powerful portals designed to accelerate your startup journey
             </p>
-            <ul className="space-y-3">
-              <li className="flex items-center gap-3">
-                <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                <span className="text-slate-700">Smart job matching with AI</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                <span className="text-slate-700">Direct chat with candidates</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                <span className="text-slate-700">Application tracking system</span>
-              </li>
-            </ul>
           </motion.div>
 
-          {/* Mentorship Portal Card */}
-          <motion.div
-            whileHover={{ y: -8 }}
-            className="p-8 rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-xl transition-all duration-300"
-          >
-            <div className="w-16 h-16 rounded-2xl bg-teal-100 flex items-center justify-center mb-6">
-              <Users className="w-8 h-8 text-teal-600" />
-            </div>
-            <h3 className="text-2xl font-semibold mb-4" style={{ fontFamily: 'Outfit' }}>
-              Mentorship Portal
-            </h3>
-            <p className="text-slate-600 mb-6 leading-relaxed">
-              Connect with experienced mentors who've been there. Get guidance, feedback, and
-              support to take your startup to the next level.
-            </p>
-            <ul className="space-y-3">
-              <li className="flex items-center gap-3">
-                <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                <span className="text-slate-700">Expert mentor profiles</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                <span className="text-slate-700">Easy session booking</span>
-              </li>
-              <li className="flex items-center gap-3">
-                <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                <span className="text-slate-700">Integrated payments</span>
-              </li>
-            </ul>
-          </motion.div>
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Hiring Portal - Large Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              whileHover={{ y: -8 }}
+              className="md:row-span-2 p-8 rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-2xl shadow-blue-500/20 relative overflow-hidden group"
+            >
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full filter blur-3xl"></div>
+              <div className="relative z-10">
+                <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <Briefcase className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-3xl font-bold mb-4" style={{ fontFamily: 'Outfit' }}>
+                  Hiring Portal
+                </h3>
+                <p className="text-blue-100 mb-6 leading-relaxed text-lg">
+                  Build your dream team with AI-powered matching. Connect with top talent 
+                  across India and scale your startup faster.
+                </p>
+                
+                <div className="space-y-3 mb-8">
+                  {[
+                    'AI-powered candidate matching',
+                    'Direct messaging & interviews',
+                    'Application tracking system',
+                    'Smart job recommendations'
+                  ].map((feature, idx) => (
+                    <div key={idx} className="flex items-center gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0" />
+                      <span className="text-white/90">{feature}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <img
+                  src="https://images.unsplash.com/photo-1488590528505-98d2b5aba04b"
+                  alt="Technology platform"
+                  className="rounded-2xl shadow-xl mt-6 opacity-90 group-hover:opacity-100 transition-opacity"
+                />
+              </div>
+            </motion.div>
+
+            {/* Mentorship Portal */}
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              whileHover={{ y: -8 }}
+              className="p-8 rounded-3xl bg-white border-2 border-slate-200 shadow-lg hover:shadow-2xl transition-all group"
+            >
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg shadow-purple-500/20">
+                <Users className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold mb-4 text-slate-800" style={{ fontFamily: 'Outfit' }}>
+                Mentorship Portal
+              </h3>
+              <p className="text-slate-600 mb-6 leading-relaxed">
+                Learn from those who've walked the path. Connect with experienced mentors 
+                to navigate your startup journey.
+              </p>
+              
+              <div className="space-y-3">
+                {[
+                  'Verified expert mentors',
+                  'Easy session booking',
+                  'Secure payments',
+                  '1-on-1 guidance'
+                ].map((feature, idx) => (
+                  <div key={idx} className="flex items-center gap-3">
+                    <div className="w-2 h-2 rounded-full bg-gradient-to-r from-purple-600 to-pink-600"></div>
+                    <span className="text-slate-700">{feature}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Community Feature */}
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              whileHover={{ y: -8 }}
+              className="p-8 rounded-3xl bg-gradient-to-br from-teal-500 to-emerald-600 text-white shadow-2xl shadow-teal-500/20 relative overflow-hidden group"
+            >
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full filter blur-3xl"></div>
+              <div className="relative z-10">
+                <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <MessageCircle className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold mb-4" style={{ fontFamily: 'Outfit' }}>
+                  Real-Time Chat
+                </h3>
+                <p className="text-teal-100 leading-relaxed">
+                  Instant messaging between startups, candidates, and mentors. 
+                  Build relationships that matter.
+                </p>
+              </div>
+            </motion.div>
+          </div>
         </div>
-      </div>
+      </section>
+
+      {/* Why Choose Us */}
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-6">
+          <motion.div 
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-4xl md:text-5xl font-bold mb-4" style={{ fontFamily: 'Outfit' }}>
+              Why Startups Choose Us
+            </h2>
+            <p className="text-xl text-slate-600">
+              Built by founders, for founders
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                icon: <Zap className="w-8 h-8" />,
+                title: 'Lightning Fast',
+                description: 'Set up your profile and start connecting in minutes, not days',
+                gradient: 'from-yellow-500 to-orange-500'
+              },
+              {
+                icon: <Target className="w-8 h-8" />,
+                title: 'Precision Matching',
+                description: 'AI-powered algorithms ensure you find the perfect fit every time',
+                gradient: 'from-blue-500 to-indigo-500'
+              },
+              {
+                icon: <Award className="w-8 h-8" />,
+                title: 'Verified Quality',
+                description: 'Every profile is verified. Connect with confidence and trust',
+                gradient: 'from-purple-500 to-pink-500'
+              }
+            ].map((item, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.1 }}
+                whileHover={{ y: -8 }}
+                className="p-8 rounded-3xl border-2 border-slate-200 hover:border-slate-300 bg-white shadow-lg hover:shadow-2xl transition-all"
+              >
+                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center mb-6 text-white shadow-lg`}>
+                  {item.icon}
+                </div>
+                <h3 className="text-2xl font-bold mb-3 text-slate-800" style={{ fontFamily: 'Outfit' }}>
+                  {item.title}
+                </h3>
+                <p className="text-slate-600 leading-relaxed">
+                  {item.description}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* CTA Section */}
       <div className="max-w-7xl mx-auto px-6 py-24">
