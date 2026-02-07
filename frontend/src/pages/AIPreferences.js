@@ -298,11 +298,9 @@ export default function AIPreferences() {
       );
 
       setShowCompletion(true);
-      addMessage('bot', "🎉 Perfect! I've got everything I need. Let me find the best opportunities for you...");
+      addMessage('bot', "🎉 Perfect! Your preferences have been saved successfully. You can now access your personalized job matches anytime from the navigation bar!");
 
-      setTimeout(() => {
-        navigate('/ai-matches');
-      }, 3000);
+      toast.success('Preferences saved! Access AI Matches from navbar anytime.');
     } catch (error) {
       toast.error('Failed to save preferences');
       setIsSubmitting(false);
