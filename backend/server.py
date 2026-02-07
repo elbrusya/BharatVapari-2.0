@@ -984,6 +984,261 @@ async def logout(request: Request, response: Response, authorization: str = Head
     
     return {"message": "Logged out successfully"}
 
+# AI Matching Routes
+@api_router.post("/ai/job-seeker-preferences")
+async def save_job_seeker_preferences(
+    preferences: JobSeekerPreferencesCreate,
+    request: Request,
+    authorization: str = Header(None)
+):
+    """Save or update job seeker preferences"""
+    user = await verify_session_token(request, authorization)
+    user_id = user['id']
+    
+    # Check if preferences exist
+    existing = await db.job_seeker_preferences.find_one({"user_id": user_id})
+    
+    pref_data = preferences.model_dump()
+    pref_data['user_id'] = user_id
+    pref_data['updated_at'] = datetime.now(timezone.utc).isoformat()
+    
+    if existing:
+        await db.job_seeker_preferences.update_one(
+            {"user_id": user_id},
+            {"$set": pref_data}
+        )
+    else:
+        await db.job_seeker_preferences.insert_one(pref_data)
+    
+    return {"message": "Preferences saved successfully", "completed": pref_data.get('completed', False)}
+
+@api_router.get("/ai/job-seeker-preferences")
+async def get_job_seeker_preferences(request: Request, authorization: str = Header(None)):
+    """Get job seeker preferences"""
+    user = await verify_session_token(request, authorization)
+    user_id = user['id']
+    
+    preferences = await db.job_seeker_preferences.find_one({"user_id": user_id}, {"_id": 0})
+    
+    if not preferences:
+        return {
+            "exists": False,
+            "preferences": None
+        }
+    
+    return {
+        "exists": True,
+        "preferences": preferences
+    }
+
+@api_router.get("/ai/job-matches")
+async def get_job_matches(
+    request: Request,
+    authorization: str = Header(None),
+    limit: int = 50
+):
+    """Get AI-powered job recommendations for job seeker"""
+    user = await verify_session_token(request, authorization)
+    user_id = user['id']
+    
+    # Get preferences
+    preferences = await db.job_seeker_preferences.find_one({"user_id": user_id}, {"_id": 0})
+    
+    if not preferences or not preferences.get('completed'):
+        raise HTTPException(
+            status_code=400,
+            detail="Please complete your preferences first"
+        )
+    
+    # Get all active jobs
+    jobs = await db.jobs.find({"status": "active"}, {"_id": 0}).limit(limit).to_list(limit)
+    
+    if not jobs:
+        return {
+            "total_matches": 0,
+            "best_matches": [],
+            "good_matches": [],
+            "stretch_matches": [],
+            "ai_insights": "No active jobs available right now. Check back soon!"
+        }
+    
+    # Get AI recommendations
+    recommendations = await get_ai_job_recommendations(user_id, preferences, jobs)
+    
+    return recommendations
+
+@api_router.post("/ai/startup-job-preferences/{job_id}")
+async def save_startup_job_preferences(
+    job_id: str,
+    preferences: StartupJobPreferencesCreate,
+    payload: dict = Depends(verify_token)
+):
+    """Save startup's candidate preferences for a job"""
+    if payload['role'] != 'startup':
+        raise HTTPException(status_code=403, detail="Only startups can set job preferences")
+    
+    # Verify job exists and belongs to this startup
+    job = await db.jobs.find_one({"id": job_id, "posted_by": payload['user_id']}, {"_id": 0})
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found or unauthorized")
+    
+    # Save preferences
+    pref_data = preferences.model_dump()
+    pref_data['job_id'] = job_id
+    pref_data['updated_at'] = datetime.now(timezone.utc).isoformat()
+    
+    existing = await db.startup_job_preferences.find_one({"job_id": job_id})
+    
+    if existing:
+        await db.startup_job_preferences.update_one(
+            {"job_id": job_id},
+            {"$set": pref_data}
+        )
+    else:
+        await db.startup_job_preferences.insert_one(pref_data)
+    
+    return {"message": "Job preferences saved successfully"}
+
+@api_router.get("/ai/startup-job-preferences/{job_id}")
+async def get_startup_job_preferences(job_id: str, payload: dict = Depends(verify_token)):
+    """Get startup's candidate preferences for a job"""
+    if payload['role'] != 'startup':
+        raise HTTPException(status_code=403, detail="Only startups can view job preferences")
+    
+    preferences = await db.startup_job_preferences.find_one({"job_id": job_id}, {"_id": 0})
+    
+    return {
+        "exists": preferences is not None,
+        "preferences": preferences
+    }
+
+@api_router.get("/ai/candidate-matches/{job_id}")
+async def get_candidate_matches(job_id: str, payload: dict = Depends(verify_token)):
+    """Get AI-powered candidate recommendations for a job"""
+    if payload['role'] != 'startup':
+        raise HTTPException(status_code=403, detail="Only startups can view candidate matches")
+    
+    # Get job
+    job = await db.jobs.find_one({"id": job_id, "posted_by": payload['user_id']}, {"_id": 0})
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    # Get job preferences
+    job_prefs = await db.startup_job_preferences.find_one({"job_id": job_id}, {"_id": 0})
+    
+    if not job_prefs:
+        raise HTTPException(
+            status_code=400,
+            detail="Please set candidate preferences for this job first"
+        )
+    
+    # Get all job seekers with completed preferences
+    job_seekers = await db.users.find(
+        {"role": "job_seeker"},
+        {"_id": 0}
+    ).to_list(1000)
+    
+    # Filter those with completed preferences
+    candidates_with_prefs = []
+    for seeker in job_seekers:
+        prefs = await db.job_seeker_preferences.find_one(
+            {"user_id": seeker['id'], "completed": True},
+            {"_id": 0}
+        )
+        if prefs:
+            candidates_with_prefs.append(seeker)
+    
+    if not candidates_with_prefs:
+        return {
+            "total_candidates": 0,
+            "matches": [],
+            "message": "No candidates with completed preferences found"
+        }
+    
+    # Calculate matches
+    matches = []
+    for candidate in candidates_with_prefs:
+        match = await calculate_candidate_match_score(candidate, job, job_prefs)
+        matches.append(match)
+    
+    # Sort by score
+    matches.sort(key=lambda x: x.match_score, reverse=True)
+    
+    return {
+        "total_candidates": len(matches),
+        "matches": matches[:50],  # Top 50 candidates
+        "job_title": job['title']
+    }
+
+@api_router.post("/ai/generate-insights")
+async def generate_ai_insights(
+    request: Request,
+    authorization: str = Header(None)
+):
+    """Generate personalized AI insights for user"""
+    user = await verify_session_token(request, authorization)
+    user_id = user['id']
+    
+    try:
+        llm_key = os.environ.get('EMERGENT_LLM_KEY')
+        if not llm_key:
+            raise HTTPException(status_code=500, detail="AI service not configured")
+        
+        chat = LlmChat(api_key=llm_key, model="gpt-4")
+        
+        # Get user context
+        if user['role'] == 'job_seeker':
+            preferences = await db.job_seeker_preferences.find_one({"user_id": user_id}, {"_id": 0})
+            applications = await db.applications.find({"applicant_id": user_id}, {"_id": 0}).to_list(100)
+            
+            context = f"""
+User: {user.get('full_name')}
+Role: Job Seeker
+Skills: {', '.join(user.get('skills', [])[:8])}
+Applications: {len(applications)}
+Career Goals: {', '.join(preferences.get('career_goals', [])) if preferences else 'Not set'}
+"""
+            
+            prompt = f"""You are a career advisor AI. Based on this job seeker's profile, provide:
+1. A personalized career insight (2-3 sentences)
+2. One specific actionable tip to improve their job search
+
+Context:
+{context}
+
+Be encouraging and specific."""
+            
+        elif user['role'] == 'startup':
+            jobs = await db.jobs.find({"posted_by": user_id}, {"_id": 0}).to_list(100)
+            
+            context = f"""
+Company: {user.get('company', 'Unknown')}
+Role: Startup Hiring
+Active Jobs: {len([j for j in jobs if j.get('status') == 'active'])}
+"""
+            
+            prompt = f"""You are a hiring advisor AI. Based on this startup's profile, provide:
+1. A hiring insight (2-3 sentences)
+2. One tip to attract better candidates
+
+Context:
+{context}
+
+Be specific and actionable."""
+        
+        else:
+            return {"insight": "AI insights available for job seekers and startups"}
+        
+        response = await chat.aask([UserMessage(content=prompt)])
+        
+        return {
+            "insight": response.content if response else "Unable to generate insights at this time"
+        }
+    
+    except Exception as e:
+        logging.error(f"AI insights error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to generate AI insights")
+
 # Admin Routes
 @api_router.post("/admin/request")
 async def request_admin_access(request_data: AdminRequest):
