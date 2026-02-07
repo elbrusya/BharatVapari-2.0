@@ -1413,7 +1413,6 @@ async def get_admin_stats(request: Request, authorization: str = Header(None)):
     startups = await db.users.count_documents({"role": "startup"})
     job_seekers = await db.users.count_documents({"role": "job_seeker"})
     mentors = await db.users.count_documents({"role": "mentor"})
-    mentees = await db.users.count_documents({"role": "mentee"})
     
     total_jobs = await db.jobs.count_documents({})
     active_jobs = await db.jobs.count_documents({"status": "active"})
@@ -1428,8 +1427,7 @@ async def get_admin_stats(request: Request, authorization: str = Header(None)):
             "total": total_users,
             "startups": startups,
             "job_seekers": job_seekers,
-            "mentors": mentors,
-            "mentees": mentees
+            "mentors": mentors
         },
         "hiring": {
             "total_jobs": total_jobs,
