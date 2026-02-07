@@ -162,7 +162,7 @@ export default function Dashboard() {
 
         {/* Quick Actions */}
         <div className="grid md:grid-cols-2 gap-8">
-          {/* AI Matching Card - For Job Seekers Only */}
+          {/* AI Matching Card - For Job Seekers */}
           {user?.role === 'job_seeker' && (
             <Card className="p-8 rounded-2xl border-l-4 border-l-blue-500 border border-slate-200 bg-gradient-to-br from-blue-50 to-white shadow-sm hover:shadow-lg transition-all">
               <div className="flex items-start gap-4">
@@ -212,6 +212,41 @@ export default function Dashboard() {
                       </Button>
                     </Link>
                   )}
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {/* AI Candidate Matching Card - For Startups */}
+          {user?.role === 'startup' && (
+            <Card className="p-8 rounded-2xl border-l-4 border-l-purple-500 border border-slate-200 bg-gradient-to-br from-purple-50 to-white shadow-sm hover:shadow-lg transition-all">
+              <div className="flex items-start gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center flex-shrink-0 animate-pulse">
+                  <Sparkles className="w-7 h-7 text-white" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className="text-2xl font-semibold" style={{ fontFamily: 'Outfit' }}>
+                      AI Candidate Matching
+                    </h3>
+                    <span className="px-2 py-1 bg-purple-600 text-white text-xs font-bold rounded-full">
+                      NEW
+                    </span>
+                  </div>
+                  <p className="text-slate-600 mb-4">
+                    Find the perfect candidates for your jobs using AI-powered matching. Get ranked candidates with compatibility scores and interview suggestions.
+                  </p>
+                  <Link to="/hiring">
+                    <Button
+                      data-testid="goto-ai-candidate-matching-button"
+                      className="rounded-full px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold shadow-lg"
+                    >
+                      View Your Jobs
+                    </Button>
+                  </Link>
+                  <p className="text-xs text-slate-500 mt-3">
+                    💡 Tip: Set candidate preferences when posting jobs to unlock AI matching
+                  </p>
                 </div>
               </div>
             </Card>
