@@ -1,7 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Home, Briefcase, Users, MessageCircle, User, LogOut } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Sparkles, Home, Briefcase, Users, MessageCircle, User, LogOut, Zap } from 'lucide-react';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
