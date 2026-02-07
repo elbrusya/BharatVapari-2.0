@@ -174,21 +174,44 @@ export default function Dashboard() {
                     <h3 className="text-2xl font-semibold" style={{ fontFamily: 'Outfit' }}>
                       AI Job Matching
                     </h3>
-                    <span className="px-2 py-1 bg-blue-600 text-white text-xs font-bold rounded-full">
-                      NEW
-                    </span>
+                    {!hasPreferences && !checkingPreferences && (
+                      <span className="px-2 py-1 bg-blue-600 text-white text-xs font-bold rounded-full">
+                        NEW
+                      </span>
+                    )}
                   </div>
                   <p className="text-slate-600 mb-4">
-                    Get personalized job recommendations powered by AI that match your skills, preferences, and career goals
+                    {hasPreferences 
+                      ? 'View your personalized AI-powered job recommendations tailored to your profile'
+                      : 'Get personalized job recommendations powered by AI that match your skills, preferences, and career goals'
+                    }
                   </p>
-                  <Link to="/ai-preferences">
+                  {checkingPreferences ? (
                     <Button
-                      data-testid="goto-ai-matching-button"
-                      className="rounded-full px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg"
+                      disabled
+                      className="rounded-full px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold shadow-lg opacity-50"
                     >
-                      Start AI Matching
+                      Loading...
                     </Button>
-                  </Link>
+                  ) : hasPreferences ? (
+                    <Link to="/ai-matches">
+                      <Button
+                        data-testid="goto-ai-matches-button"
+                        className="rounded-full px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg"
+                      >
+                        View My Matches
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Link to="/ai-preferences">
+                      <Button
+                        data-testid="goto-ai-matching-button"
+                        className="rounded-full px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg"
+                      >
+                        Start AI Matching
+                      </Button>
+                    </Link>
+                  )}
                 </div>
               </div>
             </Card>
