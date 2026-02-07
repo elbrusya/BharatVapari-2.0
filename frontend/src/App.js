@@ -125,6 +125,14 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/candidate-matches/:jobId"
+        element={
+          <ProtectedRoute>
+            <StartupCandidateMatches />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }
