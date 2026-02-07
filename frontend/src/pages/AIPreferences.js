@@ -535,10 +535,29 @@ export default function AIPreferences() {
               <Sparkles className="w-8 h-8 text-white" />
             </div>
             <h2 className="text-2xl font-bold text-slate-800 mb-2">
-              Preferences Saved!
+              Preferences Saved Successfully!
             </h2>
-            <p className="text-slate-600">
-              Finding your perfect matches...
+            <p className="text-slate-600 mb-6">
+              Your AI-powered job matches are ready. Access them anytime from the navbar!
+            </p>
+            <div className="flex gap-4 justify-center">
+              <Button
+                onClick={() => navigate('/ai-matches')}
+                className="rounded-full px-8 py-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg"
+              >
+                <Zap className="w-5 h-5 mr-2" />
+                View My Matches Now
+              </Button>
+              <Button
+                onClick={() => navigate('/dashboard')}
+                variant="outline"
+                className="rounded-full px-8 py-6 border-2 border-slate-300"
+              >
+                Go to Dashboard
+              </Button>
+            </div>
+            <p className="text-sm text-slate-500 mt-4">
+              💡 Tip: Find "AI Matches" in the top navigation bar to access your matches anytime
             </p>
           </Card>
         )}
