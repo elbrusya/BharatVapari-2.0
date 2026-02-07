@@ -911,7 +911,7 @@ async def google_session(request: Request, response: Response, x_session_id: str
         else:
             # New user - create with role or default
             user_id = str(uuid.uuid4())
-            user_role = selected_role if selected_role in ['startup', 'job_seeker', 'mentor', 'mentee'] else 'job_seeker'
+            user_role = selected_role if selected_role in ['startup', 'job_seeker', 'mentor'] else 'job_seeker'
             
             user_doc = {
                 "id": user_id,
