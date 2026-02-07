@@ -62,7 +62,6 @@ export default function Dashboard() {
       startup: { label: 'Startup', color: 'bg-indigo-100 text-indigo-700' },
       job_seeker: { label: 'Job Seeker', color: 'bg-amber-100 text-amber-700' },
       mentor: { label: 'Mentor', color: 'bg-teal-100 text-teal-700' },
-      mentee: { label: 'Mentee', color: 'bg-purple-100 text-purple-700' },
     };
     const badge = badges[role] || badges.job_seeker;
     return (
