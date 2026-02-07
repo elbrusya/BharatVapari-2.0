@@ -54,6 +54,24 @@ export default function Navbar() {
               </Link>
             )}
             
+            {/* AI Candidate Matching - Only for Startups */}
+            {user?.role === 'startup' && (
+              <Link
+                to="/hiring"
+                data-testid="nav-ai-candidates-link"
+                className="flex items-center gap-2 text-slate-700 hover:text-purple-600 transition-colors relative group"
+              >
+                <div className="relative">
+                  <Zap className="w-5 h-5" />
+                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-purple-600 rounded-full animate-pulse"></span>
+                </div>
+                <span className="font-medium">AI Candidates</span>
+                <Badge className="ml-1 px-2 py-0.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs border-0">
+                  AI
+                </Badge>
+              </Link>
+            )}
+            
             <Link
               to="/hiring"
               data-testid="nav-hiring-link"
