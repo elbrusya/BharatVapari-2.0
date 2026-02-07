@@ -474,6 +474,335 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
+# AI Matching Engine Functions
+async def calculate_job_match_score(job: dict, preferences: dict, user: dict) -> JobMatch:
+    """Calculate match score between a job and job seeker preferences"""
+    
+    total_score = 0
+    max_score = 100
+    reasons = []
+    
+    # Skill matching (30 points)
+    skill_match = 0
+    user_skills = set([s.lower() for s in (preferences.get('hard_skills', []) + user.get('skills', []))])
+    job_requirements = set([r.lower() for r in job.get('requirements', [])])
+    
+    if job_requirements and user_skills:
+        matched_skills = user_skills.intersection(job_requirements)
+        skill_match = int((len(matched_skills) / len(job_requirements)) * 100)
+        skill_score = int((skill_match / 100) * 30)
+        total_score += skill_score
+        
+        if skill_match >= 80:
+            reasons.append(f"✅ Excellent skill match ({skill_match}%)")
+        elif skill_match >= 50:
+            reasons.append(f"✅ Good skill match ({skill_match}%)")
+        else:
+            reasons.append(f"⚠️ Partial skill match ({skill_match}%)")
+    
+    # Job type matching (15 points)
+    if job.get('job_type', '').lower() in [jt.lower() for jt in preferences.get('job_types', [])]:
+        total_score += 15
+        reasons.append(f"✅ Job type matches ({job.get('job_type')})")
+    
+    # Work type matching (15 points)  
+    job_location = job.get('location', '').lower()
+    work_types = [wt.lower() for wt in preferences.get('work_type', [])]
+    
+    location_match = 0
+    if 'remote' in job_location and 'remote' in work_types:
+        total_score += 15
+        location_match = 100
+        reasons.append("✅ Remote work preference matched")
+    elif 'hybrid' in job_location and 'hybrid' in work_types:
+        total_score += 12
+        location_match = 80
+        reasons.append("✅ Hybrid work preference matched")
+    elif any(loc.lower() in job_location for loc in preferences.get('preferred_locations', [])):
+        total_score += 10
+        location_match = 70
+        reasons.append("✅ Location preference matched")
+    
+    # Salary matching (20 points)
+    salary_match = 0
+    job_salary = job.get('salary_range', '')
+    if preferences.get('salary_min') and job_salary:
+        # Simple salary parsing
+        try:
+            salary_numbers = [int(''.join(filter(str.isdigit, s))) for s in job_salary.split('-') if any(c.isdigit() for c in s)]
+            if salary_numbers:
+                job_salary_avg = sum(salary_numbers) // len(salary_numbers)
+                user_salary_min = preferences.get('salary_min', 0)
+                user_salary_max = preferences.get('salary_max', 999999999)
+                
+                if user_salary_min <= job_salary_avg <= user_salary_max:
+                    total_score += 20
+                    salary_match = 100
+                    reasons.append("✅ Salary expectations aligned")
+                elif job_salary_avg >= user_salary_min * 0.8:
+                    total_score += 15
+                    salary_match = 75
+                    reasons.append("✅ Salary close to expectations")
+                else:
+                    salary_match = 50
+                    reasons.append("⚠️ Salary below expectations")
+        except:
+            pass
+    
+    # Experience matching (20 points)
+    experience_match = 0
+    user_exp = preferences.get('experience_level', 'fresher')
+    
+    experience_levels = {
+        'student': 0,
+        'fresher': 1,
+        '1-3yrs': 2,
+        '3-5yrs': 3,
+        '5+yrs': 4
+    }
+    
+    job_desc = job.get('description', '').lower() + ' ' + ' '.join(job.get('requirements', [])).lower()
+    
+    if 'fresher' in job_desc or 'intern' in job_desc:
+        if user_exp in ['student', 'fresher']:
+            total_score += 20
+            experience_match = 100
+            reasons.append("✅ Experience level perfect match")
+    elif '1-3' in job_desc or '1 to 3' in job_desc:
+        if user_exp in ['fresher', '1-3yrs']:
+            total_score += 20
+            experience_match = 100
+            reasons.append("✅ Experience level perfect match")
+    else:
+        total_score += 10
+        experience_match = 50
+    
+    # Determine match category
+    if total_score >= 75:
+        match_category = "best"
+    elif total_score >= 50:
+        match_category = "good"
+    else:
+        match_category = "stretch"
+    
+    return JobMatch(
+        job_id=job['id'],
+        job_title=job['title'],
+        company=job['company'],
+        match_score=min(total_score, 100),
+        match_category=match_category,
+        reasons=reasons,
+        skill_match=skill_match,
+        salary_match=salary_match,
+        location_match=location_match,
+        experience_match=experience_match
+    )
+
+async def get_ai_job_recommendations(user_id: str, preferences: dict, jobs: List[dict]) -> dict:
+    """Get AI-powered job recommendations with explanations"""
+    
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        return {"matches": [], "ai_insights": ""}
+    
+    # Calculate matches for all jobs
+    matches = []
+    for job in jobs:
+        match = await calculate_job_match_score(job, preferences, user)
+        matches.append(match)
+    
+    # Sort by score
+    matches.sort(key=lambda x: x.match_score, reverse=True)
+    
+    # Use AI to generate personalized insights
+    try:
+        llm_key = os.environ.get('EMERGENT_LLM_KEY')
+        if llm_key:
+            chat = LlmChat(api_key=llm_key, model="gpt-4")
+            
+            # Prepare context
+            user_context = f"""
+Job Seeker Profile:
+- Name: {user.get('full_name')}
+- Experience: {preferences.get('experience_level')}
+- Skills: {', '.join(preferences.get('hard_skills', [])[:10])}
+- Career Goals: {', '.join(preferences.get('career_goals', []))}
+- Preferred Work: {', '.join(preferences.get('work_type', []))}
+
+Top 3 Matched Jobs:
+{chr(10).join([f"{i+1}. {m.job_title} at {m.company} ({m.match_score}% match)" for i, m in enumerate(matches[:3])])}
+"""
+            
+            prompt = f"""Based on this job seeker's profile and their top matches, provide:
+1. A brief personalized insight (2-3 sentences)
+2. One actionable career tip
+
+Context:
+{user_context}
+
+Format:
+Insight: [your insight]
+Tip: [your tip]"""
+            
+            response = await chat.aask([UserMessage(content=prompt)])
+            ai_insights = response.content if response else ""
+        else:
+            ai_insights = "Complete your profile to get personalized AI insights!"
+    except Exception as e:
+        ai_insights = f"AI insights temporarily unavailable"
+        logging.error(f"AI insights error: {e}")
+    
+    # Categorize matches
+    best_matches = [m for m in matches if m.match_category == "best"]
+    good_matches = [m for m in matches if m.match_category == "good"]
+    stretch_matches = [m for m in matches if m.match_category == "stretch"]
+    
+    return {
+        "total_matches": len(matches),
+        "best_matches": best_matches[:10],
+        "good_matches": good_matches[:10],
+        "stretch_matches": stretch_matches[:5],
+        "ai_insights": ai_insights
+    }
+
+async def calculate_candidate_match_score(candidate: dict, job: dict, job_prefs: dict) -> CandidateMatch:
+    """Calculate match score between a candidate and job requirements"""
+    
+    total_score = 0
+    strengths = []
+    gaps = []
+    
+    # Get candidate data
+    candidate_prefs = await db.job_seeker_preferences.find_one({"user_id": candidate['id']}, {"_id": 0})
+    
+    # Skill matching (40 points)
+    skill_match = 0
+    candidate_skills = set([s.lower() for s in (candidate.get('skills', []) + 
+                                                  (candidate_prefs.get('hard_skills', []) if candidate_prefs else []))])
+    must_have = set([s.lower() for s in job_prefs.get('must_have_skills', [])])
+    good_to_have = set([s.lower() for s in job_prefs.get('good_to_have_skills', [])])
+    
+    if must_have:
+        matched_must = candidate_skills.intersection(must_have)
+        must_match_pct = (len(matched_must) / len(must_have)) * 100 if must_have else 100
+        skill_match = int(must_match_pct)
+        
+        if must_match_pct >= 80:
+            total_score += 40
+            strengths.append(f"Has {len(matched_must)}/{len(must_have)} required skills")
+        elif must_match_pct >= 50:
+            total_score += 25
+            strengths.append(f"Has most required skills ({int(must_match_pct)}%)")
+            gaps.append(f"Missing some required skills")
+        else:
+            total_score += 10
+            gaps.append(f"Lacks several required skills")
+    
+    # Good-to-have skills bonus
+    if good_to_have:
+        matched_good = candidate_skills.intersection(good_to_have)
+        if len(matched_good) > 0:
+            total_score += min(10, len(matched_good) * 2)
+            strengths.append(f"Has bonus skills: {', '.join(list(matched_good)[:3])}")
+    
+    # Experience matching (30 points)
+    experience_match = 0
+    candidate_exp = candidate_prefs.get('experience_level', 'fresher') if candidate_prefs else 'fresher'
+    ideal_exp = job_prefs.get('ideal_experience', 'fresher')
+    
+    exp_levels = {'student': 0, 'fresher': 1, '1-3yrs': 2, '3-5yrs': 3, '5+yrs': 4}
+    candidate_level = exp_levels.get(candidate_exp, 1)
+    ideal_level = exp_levels.get(ideal_exp, 1)
+    
+    if candidate_level == ideal_level:
+        total_score += 30
+        experience_match = 100
+        strengths.append(f"Perfect experience match ({candidate_exp})")
+    elif abs(candidate_level - ideal_level) == 1:
+        total_score += 20
+        experience_match = 70
+        strengths.append(f"Close experience match")
+    else:
+        experience_match = 40
+        if candidate_level < ideal_level:
+            gaps.append("Less experience than ideal")
+        else:
+            gaps.append("More experience than typical for role")
+    
+    # Availability matching (15 points)
+    availability_match = 0
+    if candidate_prefs:
+        immediate_needed = job_prefs.get('immediate_joiner', False)
+        candidate_availability = candidate_prefs.get('availability', 'immediate')
+        
+        if immediate_needed and candidate_availability == 'immediate':
+            total_score += 15
+            availability_match = 100
+            strengths.append("Available immediately")
+        elif not immediate_needed:
+            total_score += 10
+            availability_match = 70
+        else:
+            availability_match = 30
+            gaps.append("Not immediately available")
+    
+    # Work type preference (10 points)
+    if candidate_prefs:
+        job_work_type = job.get('location', '').lower()
+        candidate_work_prefs = [w.lower() for w in candidate_prefs.get('work_type', [])]
+        
+        if ('remote' in job_work_type and 'remote' in candidate_work_prefs) or \
+           ('hybrid' in job_work_type and 'hybrid' in candidate_work_prefs):
+            total_score += 10
+            strengths.append("Work preference aligned")
+    
+    # Career goals alignment (5 points)
+    if candidate_prefs and job_prefs.get('startup_stage'):
+        career_goals = candidate_prefs.get('career_goals', [])
+        stage = job_prefs.get('startup_stage', '')
+        
+        if ('learning' in career_goals and stage in ['idea', 'mvp', 'early']) or \
+           ('growth' in career_goals and stage in ['growth', 'scale']):
+            total_score += 5
+            strengths.append("Career goals match startup stage")
+    
+    # Generate AI-powered interview questions
+    suggested_questions = generate_interview_questions(candidate, job, strengths, gaps)
+    
+    return CandidateMatch(
+        user_id=candidate['id'],
+        user_name=candidate.get('full_name', 'Unknown'),
+        match_score=min(total_score, 100),
+        strengths=strengths,
+        gaps=gaps,
+        skill_match=skill_match,
+        experience_match=experience_match,
+        availability_match=availability_match,
+        suggested_questions=suggested_questions
+    )
+
+def generate_interview_questions(candidate: dict, job: dict, strengths: List[str], gaps: List[str]) -> List[str]:
+    """Generate relevant interview questions based on candidate profile"""
+    questions = []
+    
+    # Technical questions based on job requirements
+    requirements = job.get('requirements', [])[:3]
+    for req in requirements:
+        questions.append(f"Can you describe your experience with {req}?")
+    
+    # Questions about gaps
+    if gaps:
+        if "skill" in gaps[0].lower():
+            questions.append("How do you typically approach learning new technologies?")
+        if "experience" in gaps[0].lower():
+            questions.append("What motivates you to take on this role despite the experience gap?")
+    
+    # Behavioral questions
+    questions.append("Tell us about a challenging project you worked on and how you overcame obstacles.")
+    questions.append(f"Why are you interested in joining {job.get('company')}?")
+    
+    return questions[:5]
+
 # Auth Routes
 @api_router.post("/auth/register")
 async def register(user: UserRegister):
