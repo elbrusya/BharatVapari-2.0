@@ -1495,7 +1495,7 @@ async def update_user_role(user_id: str, new_role: str, request: Request, author
     """Change user role"""
     await verify_admin(request, authorization)
     
-    if new_role not in ['startup', 'job_seeker', 'mentor', 'mentee']:
+    if new_role not in ['startup', 'job_seeker', 'mentor']:
         raise HTTPException(status_code=400, detail="Invalid role")
     
     result = await db.users.update_one(
