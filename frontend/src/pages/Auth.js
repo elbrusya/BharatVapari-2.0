@@ -109,7 +109,6 @@ export default function Auth() {
     { value: 'startup', label: 'Startup', icon: Building, color: 'indigo' },
     { value: 'job_seeker', label: 'Job Seeker', icon: Briefcase, color: 'amber' },
     { value: 'mentor', label: 'Mentor', icon: GraduationCap, color: 'teal' },
-    { value: 'mentee', label: 'Mentee', icon: Users, color: 'purple' },
   ];
 
   const handleGoogleLogin = () => {
