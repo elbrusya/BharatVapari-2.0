@@ -15,6 +15,8 @@ import Profile from './pages/Profile';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminRequest from './pages/admin/AdminRequest';
+import AIPreferences from './pages/AIPreferences';
+import AIMatches from './pages/AIMatches';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
