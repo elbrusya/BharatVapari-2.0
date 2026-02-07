@@ -266,6 +266,111 @@ class PaymentOrderCreate(BaseModel):
     amount: int  # in paise
     session_id: str
 
+# AI Matching Models
+class JobSeekerPreferences(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    user_id: str
+    
+    # Job preferences
+    job_types: List[str] = []  # internship, full-time, part-time, freelance
+    preferred_domains: List[str] = []  # tech, non-tech with subcategories
+    experience_level: str = "fresher"  # student, fresher, 1-3yrs, 3-5yrs, 5+yrs
+    
+    # Work preferences
+    work_type: List[str] = []  # remote, on-site, hybrid
+    preferred_locations: List[str] = []
+    salary_min: Optional[int] = None
+    salary_max: Optional[int] = None
+    working_hours: str = "flexible"  # fixed, flexible
+    
+    # Availability
+    availability: str = "immediate"  # immediate, within_x_days
+    availability_days: Optional[int] = None
+    
+    # Skills & Goals
+    hard_skills: List[str] = []
+    soft_skills: List[str] = []
+    career_goals: List[str] = []  # learning-focused, growth-focused, income-focused
+    
+    # Additional
+    resume_text: Optional[str] = None
+    bio: Optional[str] = None
+    
+    # Metadata
+    completed: bool = False
+    updated_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+class JobSeekerPreferencesCreate(BaseModel):
+    job_types: List[str] = []
+    preferred_domains: List[str] = []
+    experience_level: str = "fresher"
+    work_type: List[str] = []
+    preferred_locations: List[str] = []
+    salary_min: Optional[int] = None
+    salary_max: Optional[int] = None
+    working_hours: str = "flexible"
+    availability: str = "immediate"
+    availability_days: Optional[int] = None
+    hard_skills: List[str] = []
+    soft_skills: List[str] = []
+    career_goals: List[str] = []
+    resume_text: Optional[str] = None
+    bio: Optional[str] = None
+    completed: bool = False
+
+class StartupJobPreferences(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    job_id: str
+    
+    # Candidate preferences
+    ideal_experience: str = "fresher"  # fresher, 1-3yrs, 3-5yrs, 5+yrs
+    must_have_skills: List[str] = []
+    good_to_have_skills: List[str] = []
+    
+    # Hiring priorities
+    hiring_priorities: List[str] = []  # skills, culture_fit, learning_ability
+    team_size: Optional[int] = None
+    startup_stage: Optional[str] = None  # idea, mvp, early, growth, scale
+    
+    # Work details
+    immediate_joiner: bool = False
+    flexibility_days: Optional[int] = None
+    
+    updated_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+class StartupJobPreferencesCreate(BaseModel):
+    ideal_experience: str = "fresher"
+    must_have_skills: List[str] = []
+    good_to_have_skills: List[str] = []
+    hiring_priorities: List[str] = []
+    team_size: Optional[int] = None
+    startup_stage: Optional[str] = None
+    immediate_joiner: bool = False
+    flexibility_days: Optional[int] = None
+
+class JobMatch(BaseModel):
+    job_id: str
+    job_title: str
+    company: str
+    match_score: int  # 0-100
+    match_category: str  # best, good, stretch
+    reasons: List[str]
+    skill_match: int
+    salary_match: int
+    location_match: int
+    experience_match: int
+
+class CandidateMatch(BaseModel):
+    user_id: str
+    user_name: str
+    match_score: int  # 0-100
+    strengths: List[str]
+    gaps: List[str]
+    skill_match: int
+    experience_match: int
+    availability_match: int
+    suggested_questions: List[str]
+
 # Helper Functions
 def get_session_token(request: Request, authorization: str = Header(None)) -> Optional[str]:
     """Get session token from cookie or Authorization header"""
