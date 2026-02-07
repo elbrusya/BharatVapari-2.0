@@ -164,8 +164,27 @@ export default function AIPreferences() {
       });
 
       if (response.data.exists && response.data.preferences.completed) {
-        toast.info('You already have preferences saved. Redirecting to matches...');
-        setTimeout(() => navigate('/ai-matches'), 2000);
+        // User has preferences - show option to edit or view matches
+        const existingPrefs = response.data.preferences;
+        toast.info('Loading your saved preferences...');
+        
+        // Pre-fill the form with existing preferences if user wants to edit
+        setPreferences({
+          job_types: existingPrefs.job_types || [],
+          preferred_domains: existingPrefs.preferred_domains || [],
+          experience_level: existingPrefs.experience_level || 'fresher',
+          work_type: existingPrefs.work_type || [],
+          preferred_locations: existingPrefs.preferred_locations || [],
+          salary_min: existingPrefs.salary_min,
+          salary_max: existingPrefs.salary_max,
+          working_hours: existingPrefs.working_hours || 'flexible',
+          availability: existingPrefs.availability || 'immediate',
+          availability_days: existingPrefs.availability_days,
+          hard_skills: existingPrefs.hard_skills || [],
+          soft_skills: existingPrefs.soft_skills || [],
+          career_goals: existingPrefs.career_goals || [],
+          bio: existingPrefs.bio || ''
+        });
       }
     } catch (error) {
       console.error('Error checking preferences:', error);
