@@ -35,6 +35,25 @@ export default function Navbar() {
               <Home className="w-5 h-5" />
               <span className="font-medium">Dashboard</span>
             </Link>
+            
+            {/* AI Matches - Only for Job Seekers */}
+            {user?.role === 'job_seeker' && (
+              <Link
+                to="/ai-matches"
+                data-testid="nav-ai-matches-link"
+                className="flex items-center gap-2 text-slate-700 hover:text-blue-600 transition-colors relative group"
+              >
+                <div className="relative">
+                  <Zap className="w-5 h-5" />
+                  <span className="absolute -top-1 -right-1 w-2 h-2 bg-blue-600 rounded-full animate-pulse"></span>
+                </div>
+                <span className="font-medium">AI Matches</span>
+                <Badge className="ml-1 px-2 py-0.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs border-0">
+                  AI
+                </Badge>
+              </Link>
+            )}
+            
             <Link
               to="/hiring"
               data-testid="nav-hiring-link"
