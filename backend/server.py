@@ -46,7 +46,7 @@ class UserRegister(BaseModel):
     email: EmailStr
     password: str
     full_name: str
-    role: str  # startup, job_seeker, mentor, mentee
+    role: str  # startup, job_seeker, mentor
     
 class UserLogin(BaseModel):
     email: EmailStr
