@@ -124,6 +124,62 @@ export default function AIMatches() {
 
   if (!matches) return null;
 
+  // Show preferences needed screen
+  if (matches.needs_preferences) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/30 to-white">
+        <Navbar />
+        <div className="max-w-4xl mx-auto px-6 py-24">
+          <Card className="p-12 text-center rounded-3xl border-2 border-blue-200 bg-white shadow-xl">
+            <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
+              <Sparkles className="w-10 h-10 text-white" />
+            </div>
+            <h1 className="text-4xl font-bold text-slate-800 mb-4" style={{ fontFamily: 'Outfit' }}>
+              Welcome to AI-Powered Job Matching!
+            </h1>
+            <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
+              Get personalized job recommendations that match your skills, preferences, and career goals. 
+              Complete a quick 2-3 minute questionnaire to get started.
+            </p>
+            
+            <div className="grid md:grid-cols-3 gap-6 mb-8">
+              <div className="p-4 bg-blue-50 rounded-2xl">
+                <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <CheckCircle2 className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="font-semibold text-slate-800 mb-2">Smart Matching</h3>
+                <p className="text-sm text-slate-600">AI analyzes your profile and matches you with the best opportunities</p>
+              </div>
+              <div className="p-4 bg-indigo-50 rounded-2xl">
+                <div className="w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <TrendingUp className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="font-semibold text-slate-800 mb-2">Detailed Insights</h3>
+                <p className="text-sm text-slate-600">See why each job matches you with detailed compatibility scores</p>
+              </div>
+              <div className="p-4 bg-purple-50 rounded-2xl">
+                <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Zap className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="font-semibold text-slate-800 mb-2">Save Time</h3>
+                <p className="text-sm text-slate-600">No more browsing hundreds of jobs - see only what's relevant</p>
+              </div>
+            </div>
+
+            <Button
+              onClick={() => navigate('/ai-preferences')}
+              className="rounded-full px-10 py-7 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-lg shadow-2xl hover:shadow-3xl hover:-translate-y-1 transition-all"
+            >
+              <Sparkles className="w-5 h-5 mr-2" />
+              Complete Preferences Now
+            </Button>
+            <p className="text-sm text-slate-500 mt-4">Takes only 2-3 minutes • Free forever</p>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   const displayMatches = 
     activeFilter === 'best' ? matches.best_matches :
     activeFilter === 'good' ? matches.good_matches :
