@@ -100,6 +100,30 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/ai-preferences"
+        element={
+          <ProtectedRoute>
+            <AIPreferences />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/ai-matches"
+        element={
+          <ProtectedRoute>
+            <AIMatches />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/hiring/:jobId"
+        element={
+          <ProtectedRoute>
+            <HiringPortal />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }
