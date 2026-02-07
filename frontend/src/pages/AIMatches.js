@@ -53,8 +53,14 @@ export default function AIMatches() {
       setMatches(response.data);
     } catch (error) {
       if (error.response?.status === 400) {
-        toast.error('Please complete your preferences first');
-        navigate('/ai-preferences');
+        // No preferences completed yet
+        setMatches({ 
+          total_matches: 0, 
+          best_matches: [], 
+          good_matches: [], 
+          stretch_matches: [],
+          needs_preferences: true 
+        });
       } else {
         toast.error('Failed to load matches');
       }
