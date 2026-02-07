@@ -37,13 +37,6 @@ export default function RoleSelection({ sessionId, userData }) {
       color: 'teal',
       description: 'Guide aspiring entrepreneurs'
     },
-    { 
-      value: 'mentee', 
-      label: 'Mentee', 
-      icon: Users, 
-      color: 'purple',
-      description: 'Learn from experienced mentors'
-    },
   ];
 
   const handleContinue = async () => {
