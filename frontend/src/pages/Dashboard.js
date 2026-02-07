@@ -12,10 +12,28 @@ export default function Dashboard() {
   const { user } = useAuth();
   const [stats, setStats] = useState({ jobs: 0, applications: 0, sessions: 0, messages: 0 });
   const [loading, setLoading] = useState(true);
+  const [hasPreferences, setHasPreferences] = useState(false);
+  const [checkingPreferences, setCheckingPreferences] = useState(true);
 
   useEffect(() => {
     fetchStats();
-  }, []);
+    if (user?.role === 'job_seeker') {
+      checkPreferences();
+    }
+  }, [user]);
+
+  const checkPreferences = async () => {
+    try {
+      const response = await api.get('/ai/job-seeker-preferences');
+      if (response.data.exists && response.data.preferences.completed) {
+        setHasPreferences(true);
+      }
+    } catch (error) {
+      console.error('Error checking preferences:', error);
+    } finally {
+      setCheckingPreferences(false);
+    }
+  };
 
   const fetchStats = async () => {
     try {
