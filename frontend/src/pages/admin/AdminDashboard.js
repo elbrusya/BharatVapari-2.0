@@ -321,10 +321,6 @@ export default function AdminDashboard() {
                     <span className="text-slate-400"> Mentors</span>
                     <span className="text-white font-semibold"> {stats?.users?.mentors || 0}</span>
                   </div>
-                  <div className="flex justify-between items-center"> 
-                    <span className="text-slate-400"> Mentees</span>
-                    <span className="text-white font-semibold"> {stats?.users?.mentees || 0}</span>
-                  </div>
                 </div>
               </Card>
 
