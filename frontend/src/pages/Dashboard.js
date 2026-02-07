@@ -144,6 +144,38 @@ export default function Dashboard() {
 
         {/* Quick Actions */}
         <div className="grid md:grid-cols-2 gap-8">
+          {/* AI Matching Card - For Job Seekers Only */}
+          {user?.role === 'job_seeker' && (
+            <Card className="p-8 rounded-2xl border-l-4 border-l-blue-500 border border-slate-200 bg-gradient-to-br from-blue-50 to-white shadow-sm hover:shadow-lg transition-all">
+              <div className="flex items-start gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center flex-shrink-0 animate-pulse">
+                  <Sparkles className="w-7 h-7 text-white" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className="text-2xl font-semibold" style={{ fontFamily: 'Outfit' }}>
+                      AI Job Matching
+                    </h3>
+                    <span className="px-2 py-1 bg-blue-600 text-white text-xs font-bold rounded-full">
+                      NEW
+                    </span>
+                  </div>
+                  <p className="text-slate-600 mb-4">
+                    Get personalized job recommendations powered by AI that match your skills, preferences, and career goals
+                  </p>
+                  <Link to="/ai-preferences">
+                    <Button
+                      data-testid="goto-ai-matching-button"
+                      className="rounded-full px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-lg"
+                    >
+                      Start AI Matching
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </Card>
+          )}
+
           <Card className="p-8 rounded-2xl border-l-4 border-l-indigo-500 border border-slate-200 bg-white shadow-sm hover:shadow-md transition-all">
             <div className="flex items-start gap-4">
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center flex-shrink-0">
