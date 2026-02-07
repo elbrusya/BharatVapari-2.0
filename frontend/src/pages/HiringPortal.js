@@ -128,7 +128,16 @@ export default function HiringPortal() {
           </div>
         </div>
 
-        {user?.role !== 'startup' && (
+        {user?.role === 'startup' && job.posted_by === user.id ? (
+          <Button
+            data-testid={`ai-match-job-${job.id}-button`}
+            onClick={() => window.location.href = `/candidate-matches/${job.id}`}
+            className="w-full rounded-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold flex items-center justify-center gap-2"
+          >
+            <Sparkles className="w-4 h-4" />
+            AI Match Candidates
+          </Button>
+        ) : user?.role !== 'startup' && (
           <Button
             data-testid={`apply-job-${job.id}-button`}
             onClick={() => {
