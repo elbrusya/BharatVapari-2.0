@@ -161,14 +161,7 @@ def validate_profile_completion(user_data: dict, profile_data: dict) -> bool:
             profile_data.get('location')
         ])
     
-    elif role == 'mentee':
-        # Mentee: basic profile (same as job_seeker for now)
-        return all([
-            user_data.get('full_name'),
-            profile_data.get('linkedin'),
-            profile_data.get('location'),
-            profile_data.get('skills') and len(profile_data.get('skills', [])) > 0
-        ])
+    return False
     
     return False
     
