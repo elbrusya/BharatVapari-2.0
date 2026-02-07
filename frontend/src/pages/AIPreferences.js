@@ -17,7 +17,8 @@ import {
   Sparkles,
   Loader2,
   ChevronRight,
-  ArrowLeft
+  ArrowLeft,
+  Zap
 } from 'lucide-react';
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
