@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import api from '../utils/api';
+import axios from 'axios';
 import { toast } from 'sonner';
 import { Briefcase, MapPin, DollarSign, Clock, Plus, Send, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
