@@ -70,9 +70,18 @@ export default function HiringPortal() {
         ...jobForm,
         requirements: jobForm.requirements.split('\n').filter((r) => r.trim()),
       };
-      await api.createJob(data);
+      const response = await api.createJob(data);
       toast.success('Job posted successfully!');
       setShowJobForm(false);
+      
+      // Prompt to set AI preferences
+      const newJobId = response.data.job_id || response.data.id;
+      if (newJobId) {
+        setTimeout(() => {
+          toast.info('Set AI preferences to find the best candidates!', { duration: 5000 });
+        }, 1000);
+      }
+      
       setJobForm({
         title: '',
         company: '',
@@ -85,6 +94,52 @@ export default function HiringPortal() {
       fetchJobs();
     } catch (error) {
       toast.error('Failed to create job');
+    }
+  };
+
+  const handleSavePreferences = async (e) => {
+    e.preventDefault();
+    try {
+      const data = {
+        ideal_experience: preferencesForm.ideal_experience,
+        must_have_skills: preferencesForm.must_have_skills.split(',').map(s => s.trim()).filter(s => s),
+        good_to_have_skills: preferencesForm.good_to_have_skills.split(',').map(s => s.trim()).filter(s => s),
+        hiring_priorities: preferencesForm.hiring_priorities,
+        team_size: preferencesForm.team_size ? parseInt(preferencesForm.team_size) : null,
+        startup_stage: preferencesForm.startup_stage,
+        immediate_joiner: preferencesForm.immediate_joiner,
+        flexibility_days: preferencesForm.flexibility_days ? parseInt(preferencesForm.flexibility_days) : null,
+      };
+
+      await api.post(`/ai/startup-job-preferences/${selectedJobForPreferences.id}`, data);
+      toast.success('AI preferences saved! You can now view matched candidates.');
+      setShowPreferencesForm(false);
+      setPreferencesForm({
+        ideal_experience: 'fresher',
+        must_have_skills: '',
+        good_to_have_skills: '',
+        hiring_priorities: [],
+        team_size: '',
+        startup_stage: '',
+        immediate_joiner: false,
+        flexibility_days: '',
+      });
+    } catch (error) {
+      toast.error('Failed to save preferences');
+    }
+  };
+
+  const togglePriority = (priority) => {
+    if (preferencesForm.hiring_priorities.includes(priority)) {
+      setPreferencesForm({
+        ...preferencesForm,
+        hiring_priorities: preferencesForm.hiring_priorities.filter(p => p !== priority)
+      });
+    } else {
+      setPreferencesForm({
+        ...preferencesForm,
+        hiring_priorities: [...preferencesForm.hiring_priorities, priority]
+      });
     }
   };
 
