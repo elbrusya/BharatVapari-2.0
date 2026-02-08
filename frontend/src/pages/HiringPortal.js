@@ -404,6 +404,176 @@ export default function HiringPortal() {
             </form>
           </DialogContent>
         </Dialog>
+
+        {/* AI Preferences Dialog */}
+        <Dialog open={showPreferencesForm} onOpenChange={setShowPreferencesForm}>
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold flex items-center gap-2" style={{ fontFamily: 'Outfit' }}>
+                <Sparkles className="w-6 h-6 text-purple-600" />
+                Set AI Candidate Preferences
+              </DialogTitle>
+              <p className="text-slate-600 mt-2">
+                Help our AI find the perfect candidates for: <span className="font-semibold">{selectedJobForPreferences?.title}</span>
+              </p>
+            </DialogHeader>
+            <form onSubmit={handleSavePreferences} className="space-y-6 mt-4">
+              {/* Experience Level */}
+              <div>
+                <Label className="text-base font-semibold mb-3 block">Ideal Experience Level</Label>
+                <div className="flex flex-wrap gap-2">
+                  {['fresher', '1-3yrs', '3-5yrs', '5+yrs'].map((exp) => (
+                    <button
+                      key={exp}
+                      type="button"
+                      onClick={() => setPreferencesForm({ ...preferencesForm, ideal_experience: exp })}
+                      className={`px-4 py-2 rounded-full border-2 transition-all ${
+                        preferencesForm.ideal_experience === exp
+                          ? 'bg-purple-600 text-white border-purple-600'
+                          : 'border-slate-300 hover:border-purple-600'
+                      }`}
+                    >
+                      {exp === 'fresher' ? 'Fresher' : exp.replace('yrs', ' Years')}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Must Have Skills */}
+              <div>
+                <Label htmlFor="must_have_skills" className="text-base font-semibold">
+                  Must-Have Skills <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="must_have_skills"
+                  value={preferencesForm.must_have_skills}
+                  onChange={(e) => setPreferencesForm({ ...preferencesForm, must_have_skills: e.target.value })}
+                  placeholder="e.g., React, Node.js, Python (comma separated)"
+                  className="mt-2"
+                  required
+                />
+                <p className="text-sm text-slate-500 mt-1">Enter skills separated by commas</p>
+              </div>
+
+              {/* Good to Have Skills */}
+              <div>
+                <Label htmlFor="good_to_have_skills" className="text-base font-semibold">
+                  Good-to-Have Skills
+                </Label>
+                <Input
+                  id="good_to_have_skills"
+                  value={preferencesForm.good_to_have_skills}
+                  onChange={(e) => setPreferencesForm({ ...preferencesForm, good_to_have_skills: e.target.value })}
+                  placeholder="e.g., AWS, Docker, GraphQL (comma separated)"
+                  className="mt-2"
+                />
+              </div>
+
+              {/* Hiring Priorities */}
+              <div>
+                <Label className="text-base font-semibold mb-3 block">Hiring Priorities (Select all that apply)</Label>
+                <div className="flex flex-wrap gap-2">
+                  {['skills', 'culture_fit', 'learning_ability'].map((priority) => (
+                    <button
+                      key={priority}
+                      type="button"
+                      onClick={() => togglePriority(priority)}
+                      className={`px-4 py-2 rounded-full border-2 transition-all ${
+                        preferencesForm.hiring_priorities.includes(priority)
+                          ? 'bg-purple-600 text-white border-purple-600'
+                          : 'border-slate-300 hover:border-purple-600'
+                      }`}
+                    >
+                      {priority.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Startup Stage */}
+              <div>
+                <Label className="text-base font-semibold mb-3 block">Startup Stage</Label>
+                <div className="flex flex-wrap gap-2">
+                  {['idea', 'mvp', 'early', 'growth', 'scale'].map((stage) => (
+                    <button
+                      key={stage}
+                      type="button"
+                      onClick={() => setPreferencesForm({ ...preferencesForm, startup_stage: stage })}
+                      className={`px-4 py-2 rounded-full border-2 transition-all ${
+                        preferencesForm.startup_stage === stage
+                          ? 'bg-purple-600 text-white border-purple-600'
+                          : 'border-slate-300 hover:border-purple-600'
+                      }`}
+                    >
+                      {stage.charAt(0).toUpperCase() + stage.slice(1)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Team Size */}
+              <div>
+                <Label htmlFor="team_size" className="text-base font-semibold">Team Size</Label>
+                <Input
+                  id="team_size"
+                  type="number"
+                  value={preferencesForm.team_size}
+                  onChange={(e) => setPreferencesForm({ ...preferencesForm, team_size: e.target.value })}
+                  placeholder="e.g., 10"
+                  className="mt-2"
+                />
+              </div>
+
+              {/* Immediate Joiner */}
+              <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl">
+                <input
+                  type="checkbox"
+                  id="immediate_joiner"
+                  checked={preferencesForm.immediate_joiner}
+                  onChange={(e) => setPreferencesForm({ ...preferencesForm, immediate_joiner: e.target.checked })}
+                  className="w-5 h-5 rounded border-slate-300"
+                />
+                <Label htmlFor="immediate_joiner" className="text-base font-semibold cursor-pointer">
+                  Need immediate joiner
+                </Label>
+              </div>
+
+              {/* Flexibility Days */}
+              {!preferencesForm.immediate_joiner && (
+                <div>
+                  <Label htmlFor="flexibility_days" className="text-base font-semibold">
+                    Joining Flexibility (Days)
+                  </Label>
+                  <Input
+                    id="flexibility_days"
+                    type="number"
+                    value={preferencesForm.flexibility_days}
+                    onChange={(e) => setPreferencesForm({ ...preferencesForm, flexibility_days: e.target.value })}
+                    placeholder="e.g., 30"
+                    className="mt-2"
+                  />
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowPreferencesForm(false)}
+                  className="flex-1 rounded-full"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="flex-1 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold"
+                >
+                  Save Preferences
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
