@@ -39,6 +39,28 @@ export default function StartupCandidateMatches() {
   const [loading, setLoading] = useState(true);
   const [matches, setMatches] = useState(null);
   const [jobDetails, setJobDetails] = useState(null);
+  
+  // Modal states
+  const [showAcceptModal, setShowAcceptModal] = useState(false);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [selectedCandidate, setSelectedCandidate] = useState(null);
+  
+  // Interview form
+  const [interviewForm, setInterviewForm] = useState({
+    interview_date: '',
+    interview_time: '',
+    interview_type: 'video',
+    location: '',
+    meeting_link: '',
+    notes: ''
+  });
+  
+  // Rejection form
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [rejectionNotes, setRejectionNotes] = useState('');
+  
+  // Candidate statuses
+  const [candidateStatuses, setCandidateStatuses] = useState({});
 
   useEffect(() => {
     if (user?.role !== 'startup') {
