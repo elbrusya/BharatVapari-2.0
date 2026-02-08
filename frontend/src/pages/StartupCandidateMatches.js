@@ -82,6 +82,17 @@ export default function StartupCandidateMatches() {
       });
       setMatches(response.data);
       setJobDetails({ title: response.data.job_title });
+      
+      // Fetch status for each candidate
+      const statuses = {};
+      for (const candidate of response.data.matches) {
+        const statusRes = await axios.get(`${API}/candidates/${candidate.user_id}/status/${jobId}`, {
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        statuses[candidate.user_id] = statusRes.data;
+      }
+      setCandidateStatuses(statuses);
     } catch (error) {
       if (error.response?.status === 400) {
         toast.error('Please set candidate preferences for this job first');
@@ -95,6 +106,93 @@ export default function StartupCandidateMatches() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAccept = async (e) => {
+    e.preventDefault();
+    try {
+      // Make accept decision
+      await axios.post(
+        `${API}/candidates/${selectedCandidate.user_id}/decision?job_id=${jobId}`,
+        { decision: 'accepted', notes: interviewForm.notes },
+        {
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        }
+      );
+      
+      // Schedule interview if date is provided
+      if (interviewForm.interview_date && interviewForm.interview_time) {
+        await axios.post(
+          `${API}/candidates/${selectedCandidate.user_id}/interview?job_id=${jobId}`,
+          interviewForm,
+          {
+            withCredentials: true,
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+          }
+        );
+        toast.success(`Candidate accepted and interview scheduled!`);
+      } else {
+        toast.success(`Candidate accepted successfully!`);
+      }
+      
+      setShowAcceptModal(false);
+      setInterviewForm({
+        interview_date: '',
+        interview_time: '',
+        interview_type: 'video',
+        location: '',
+        meeting_link: '',
+        notes: ''
+      });
+      
+      // Refresh statuses
+      fetchCandidateMatches();
+    } catch (error) {
+      toast.error('Failed to accept candidate');
+    }
+  };
+
+  const handleReject = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(
+        `${API}/candidates/${selectedCandidate.user_id}/decision?job_id=${jobId}`,
+        { 
+          decision: 'rejected', 
+          rejection_reason: rejectionReason,
+          notes: rejectionNotes 
+        },
+        {
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        }
+      );
+      
+      toast.success('Candidate decision recorded');
+      setShowRejectModal(false);
+      setRejectionReason('');
+      setRejectionNotes('');
+      
+      // Refresh statuses
+      fetchCandidateMatches();
+    } catch (error) {
+      toast.error('Failed to reject candidate');
+    }
+  };
+
+  const getCandidateStatus = (candidateId) => {
+    return candidateStatuses[candidateId]?.decision?.decision || 'pending';
+  };
+
+  const getStatusBadge = (status) => {
+    const badges = {
+      accepted: { label: 'Accepted', color: 'bg-green-100 text-green-700 border-green-300' },
+      rejected: { label: 'Rejected', color: 'bg-red-100 text-red-700 border-red-300' },
+      pending: { label: 'Pending', color: 'bg-gray-100 text-gray-700 border-gray-300' }
+    };
+    const badge = badges[status] || badges.pending;
+    return <Badge className={`${badge.color} border`}>{badge.label}</Badge>;
   };
 
   const getScoreColor = (score) => {
