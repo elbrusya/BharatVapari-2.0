@@ -371,10 +371,51 @@ export default function StartupCandidateMatches() {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-3 min-w-[180px]">
+                    {/* Status Badge */}
+                    <div className="text-center">
+                      {getStatusBadge(getCandidateStatus(candidate.user_id))}
+                    </div>
+                    
+                    {getCandidateStatus(candidate.user_id) === 'pending' ? (
+                      <>
+                        <Button
+                          onClick={() => {
+                            setSelectedCandidate(candidate);
+                            setShowAcceptModal(true);
+                          }}
+                          className="rounded-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 whitespace-nowrap"
+                        >
+                          <Check className="w-4 h-4 mr-2" />
+                          Accept
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            setSelectedCandidate(candidate);
+                            setShowRejectModal(true);
+                          }}
+                          variant="outline"
+                          className="rounded-full border-2 border-red-600 text-red-600 hover:bg-red-50 whitespace-nowrap"
+                        >
+                          <X className="w-4 h-4 mr-2" />
+                          Reject
+                        </Button>
+                      </>
+                    ) : (
+                      candidateStatuses[candidate.user_id]?.interviews?.length > 0 && (
+                        <div className="text-xs text-center p-2 bg-blue-50 rounded-lg">
+                          <Calendar className="w-4 h-4 mx-auto mb-1 text-blue-600" />
+                          <span className="text-blue-600 font-medium">
+                            Interview Scheduled
+                          </span>
+                        </div>
+                      )
+                    )}
+                    
                     <Button
                       onClick={() => navigate(`/chat/${candidate.user_id}`)}
-                      className="rounded-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 whitespace-nowrap"
+                      variant="outline"
+                      className="rounded-full border-2 border-purple-600 text-purple-600 hover:bg-purple-50 whitespace-nowrap"
                     >
                       <MessageCircle className="w-4 h-4 mr-2" />
                       Contact
@@ -385,6 +426,207 @@ export default function StartupCandidateMatches() {
             ))
           )}
         </div>
+
+        {/* Accept Modal */}
+        <Dialog open={showAcceptModal} onOpenChange={setShowAcceptModal}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold flex items-center gap-2" style={{ fontFamily: 'Outfit' }}>
+                <Check className="w-6 h-6 text-green-600" />
+                Accept Candidate & Schedule Interview
+              </DialogTitle>
+              <p className="text-slate-600 mt-2">
+                Accept <span className="font-semibold">{selectedCandidate?.user_name}</span> and optionally schedule an interview
+              </p>
+            </DialogHeader>
+            <form onSubmit={handleAccept} className="space-y-6 mt-4">
+              {/* Interview Date & Time */}
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="interview_date" className="text-base font-semibold">Interview Date (Optional)</Label>
+                  <Input
+                    id="interview_date"
+                    type="date"
+                    value={interviewForm.interview_date}
+                    onChange={(e) => setInterviewForm({ ...interviewForm, interview_date: e.target.value })}
+                    className="mt-2"
+                    min={new Date().toISOString().split('T')[0]}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="interview_time" className="text-base font-semibold">Interview Time</Label>
+                  <Input
+                    id="interview_time"
+                    type="time"
+                    value={interviewForm.interview_time}
+                    onChange={(e) => setInterviewForm({ ...interviewForm, interview_time: e.target.value })}
+                    className="mt-2"
+                  />
+                </div>
+              </div>
+
+              {/* Interview Type */}
+              <div>
+                <Label className="text-base font-semibold mb-3 block">Interview Type</Label>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { value: 'video', label: 'Video Call', icon: Video },
+                    { value: 'phone', label: 'Phone', icon: Phone },
+                    { value: 'in-person', label: 'In Person', icon: MapPin }
+                  ].map(({ value, label, icon: Icon }) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setInterviewForm({ ...interviewForm, interview_type: value })}
+                      className={`px-4 py-2 rounded-full border-2 transition-all flex items-center gap-2 ${
+                        interviewForm.interview_type === value
+                          ? 'bg-purple-600 text-white border-purple-600'
+                          : 'border-slate-300 hover:border-purple-600'
+                      }`}
+                    >
+                      <Icon className="w-4 h-4" />
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Meeting Link (for video) */}
+              {interviewForm.interview_type === 'video' && (
+                <div>
+                  <Label htmlFor="meeting_link" className="text-base font-semibold">Meeting Link</Label>
+                  <Input
+                    id="meeting_link"
+                    type="url"
+                    value={interviewForm.meeting_link}
+                    onChange={(e) => setInterviewForm({ ...interviewForm, meeting_link: e.target.value })}
+                    placeholder="https://meet.google.com/..."
+                    className="mt-2"
+                  />
+                </div>
+              )}
+
+              {/* Location (for in-person) */}
+              {interviewForm.interview_type === 'in-person' && (
+                <div>
+                  <Label htmlFor="location" className="text-base font-semibold">Location</Label>
+                  <Input
+                    id="location"
+                    value={interviewForm.location}
+                    onChange={(e) => setInterviewForm({ ...interviewForm, location: e.target.value })}
+                    placeholder="Office address or meeting location"
+                    className="mt-2"
+                  />
+                </div>
+              )}
+
+              {/* Notes */}
+              <div>
+                <Label htmlFor="notes" className="text-base font-semibold">Notes (Optional)</Label>
+                <Textarea
+                  id="notes"
+                  value={interviewForm.notes}
+                  onChange={(e) => setInterviewForm({ ...interviewForm, notes: e.target.value })}
+                  placeholder="Any additional information for the candidate..."
+                  rows={3}
+                  className="mt-2"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowAcceptModal(false)}
+                  className="flex-1 rounded-full"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="flex-1 rounded-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold"
+                >
+                  Accept Candidate
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reject Modal */}
+        <Dialog open={showRejectModal} onOpenChange={setShowRejectModal}>
+          <DialogContent className="max-w-xl">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold flex items-center gap-2" style={{ fontFamily: 'Outfit' }}>
+                <X className="w-6 h-6 text-red-600" />
+                Reject Candidate
+              </DialogTitle>
+              <p className="text-slate-600 mt-2">
+                Reject <span className="font-semibold">{selectedCandidate?.user_name}</span> for this position
+              </p>
+            </DialogHeader>
+            <form onSubmit={handleReject} className="space-y-6 mt-4">
+              {/* Rejection Reason */}
+              <div>
+                <Label className="text-base font-semibold mb-3 block">Reason (Optional)</Label>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    'Skills mismatch',
+                    'Experience level',
+                    'Salary expectations',
+                    'Other candidates better fit',
+                    'Position filled'
+                  ].map((reason) => (
+                    <button
+                      key={reason}
+                      type="button"
+                      onClick={() => setRejectionReason(reason)}
+                      className={`px-4 py-2 rounded-full border-2 transition-all ${
+                        rejectionReason === reason
+                          ? 'bg-red-600 text-white border-red-600'
+                          : 'border-slate-300 hover:border-red-600'
+                      }`}
+                    >
+                      {reason}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Feedback Notes */}
+              <div>
+                <Label htmlFor="rejection_notes" className="text-base font-semibold">
+                  Feedback (Optional - will be shared with candidate)
+                </Label>
+                <Textarea
+                  id="rejection_notes"
+                  value={rejectionNotes}
+                  onChange={(e) => setRejectionNotes(e.target.value)}
+                  placeholder="Constructive feedback for the candidate..."
+                  rows={4}
+                  className="mt-2"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowRejectModal(false)}
+                  className="flex-1 rounded-full"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="flex-1 rounded-full bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-semibold"
+                >
+                  Confirm Rejection
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
