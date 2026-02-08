@@ -244,7 +244,7 @@ export default function StartupCandidateMatches() {
                   {/* Actions */}
                   <div className="flex flex-col gap-2">
                     <Button
-                      onClick={() => navigate(`/chat`)}
+                      onClick={() => navigate(`/chat/${candidate.user_id}`)}
                       className="rounded-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 whitespace-nowrap"
                     >
                       <MessageCircle className="w-4 h-4 mr-2" />
