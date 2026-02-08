@@ -111,7 +111,16 @@ export default function HiringPortal() {
         flexibility_days: preferencesForm.flexibility_days ? parseInt(preferencesForm.flexibility_days) : null,
       };
 
-      await api.post(`/ai/startup-job-preferences/${selectedJobForPreferences.id}`, data);
+      const token = localStorage.getItem('token');
+      await axios.post(
+        `${process.env.REACT_APP_BACKEND_URL}/api/ai/startup-job-preferences/${selectedJobForPreferences.id}`,
+        data,
+        {
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      
       toast.success('AI preferences saved! You can now view matched candidates.');
       setShowPreferencesForm(false);
       setPreferencesForm({
@@ -125,7 +134,8 @@ export default function HiringPortal() {
         flexibility_days: '',
       });
     } catch (error) {
-      toast.error('Failed to save preferences');
+      console.error('Error saving preferences:', error);
+      toast.error(error.response?.data?.detail || 'Failed to save preferences');
     }
   };
 
