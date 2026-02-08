@@ -1856,6 +1856,123 @@ async def get_mentors(skip: int = 0, limit: int = 20):
     
     return mentors
 
+# Candidate Management Routes
+@api_router.post("/candidates/{candidate_id}/decision")
+async def make_candidate_decision(
+    candidate_id: str,
+    job_id: str,
+    decision_data: CandidateDecision,
+    payload: dict = Depends(verify_token)
+):
+    """Accept or reject a candidate for a job"""
+    if payload['role'] != 'startup':
+        raise HTTPException(status_code=403, detail="Only startups can make hiring decisions")
+    
+    # Verify job belongs to this startup
+    job = await db.jobs.find_one({"id": job_id, "posted_by": payload['user_id']})
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found or unauthorized")
+    
+    # Create or update candidate decision record
+    decision_record = {
+        "candidate_id": candidate_id,
+        "job_id": job_id,
+        "startup_id": payload['user_id'],
+        "decision": decision_data.decision,
+        "notes": decision_data.notes,
+        "rejection_reason": decision_data.rejection_reason if decision_data.decision == "rejected" else None,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    # Check if decision already exists
+    existing = await db.candidate_decisions.find_one({
+        "candidate_id": candidate_id,
+        "job_id": job_id,
+        "startup_id": payload['user_id']
+    })
+    
+    if existing:
+        await db.candidate_decisions.update_one(
+            {"candidate_id": candidate_id, "job_id": job_id, "startup_id": payload['user_id']},
+            {"$set": decision_record}
+        )
+    else:
+        await db.candidate_decisions.insert_one(decision_record)
+    
+    return {
+        "message": f"Candidate {decision_data.decision}",
+        "decision": decision_data.decision
+    }
+
+@api_router.post("/candidates/{candidate_id}/interview")
+async def schedule_interview(
+    candidate_id: str,
+    job_id: str,
+    interview_data: InterviewScheduleCreate,
+    payload: dict = Depends(verify_token)
+):
+    """Schedule an interview with a candidate"""
+    if payload['role'] != 'startup':
+        raise HTTPException(status_code=403, detail="Only startups can schedule interviews")
+    
+    # Verify job belongs to this startup
+    job = await db.jobs.find_one({"id": job_id, "posted_by": payload['user_id']})
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found or unauthorized")
+    
+    # Create interview record
+    interview_id = str(uuid.uuid4())
+    interview_record = {
+        "id": interview_id,
+        "candidate_id": candidate_id,
+        "job_id": job_id,
+        "startup_id": payload['user_id'],
+        "interview_date": interview_data.interview_date,
+        "interview_time": interview_data.interview_time,
+        "interview_type": interview_data.interview_type,
+        "location": interview_data.location,
+        "meeting_link": interview_data.meeting_link,
+        "notes": interview_data.notes,
+        "status": "scheduled",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.interviews.insert_one(interview_record)
+    
+    return {
+        "message": "Interview scheduled successfully",
+        "interview_id": interview_id,
+        "interview": interview_record
+    }
+
+@api_router.get("/candidates/{candidate_id}/status/{job_id}")
+async def get_candidate_status(
+    candidate_id: str,
+    job_id: str,
+    payload: dict = Depends(verify_token)
+):
+    """Get candidate decision status for a specific job"""
+    if payload['role'] != 'startup':
+        raise HTTPException(status_code=403, detail="Unauthorized")
+    
+    decision = await db.candidate_decisions.find_one({
+        "candidate_id": candidate_id,
+        "job_id": job_id,
+        "startup_id": payload['user_id']
+    }, {"_id": 0})
+    
+    interviews = await db.interviews.find({
+        "candidate_id": candidate_id,
+        "job_id": job_id,
+        "startup_id": payload['user_id']
+    }, {"_id": 0}).to_list(100)
+    
+    return {
+        "decision": decision,
+        "interviews": interviews
+    }
+
 @api_router.get("/mentors/{mentor_id}")
 async def get_mentor_profile(mentor_id: str):
     mentor = await db.mentor_profiles.find_one({"user_id": mentor_id}, {"_id": 0})
