@@ -203,6 +203,31 @@ class ApplicationCreate(BaseModel):
     job_id: str
     cover_letter: str
 
+# Candidate Management Models
+class CandidateDecision(BaseModel):
+    decision: str  # accepted, rejected
+    notes: Optional[str] = None
+    rejection_reason: Optional[str] = None
+
+class InterviewSchedule(BaseModel):
+    candidate_id: str
+    job_id: str
+    interview_date: str
+    interview_time: str
+    interview_type: str  # video, phone, in-person
+    location: Optional[str] = None
+    meeting_link: Optional[str] = None
+    notes: Optional[str] = None
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+class InterviewScheduleCreate(BaseModel):
+    interview_date: str
+    interview_time: str
+    interview_type: str
+    location: Optional[str] = None
+    meeting_link: Optional[str] = None
+    notes: Optional[str] = None
+
 # Mentor Models
 class MentorProfile(BaseModel):
     model_config = ConfigDict(extra="ignore")
