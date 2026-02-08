@@ -19,6 +19,8 @@ export default function HiringPortal() {
   const [showJobForm, setShowJobForm] = useState(false);
   const [selectedJob, setSelectedJob] = useState(null);
   const [showApplicationForm, setShowApplicationForm] = useState(false);
+  const [showPreferencesForm, setShowPreferencesForm] = useState(false);
+  const [selectedJobForPreferences, setSelectedJobForPreferences] = useState(null);
 
   // Job form state
   const [jobForm, setJobForm] = useState({
@@ -29,6 +31,18 @@ export default function HiringPortal() {
     location: '',
     job_type: 'full-time',
     salary_range: '',
+  });
+
+  // AI Preferences form state
+  const [preferencesForm, setPreferencesForm] = useState({
+    ideal_experience: 'fresher',
+    must_have_skills: '',
+    good_to_have_skills: '',
+    hiring_priorities: [],
+    team_size: '',
+    startup_stage: '',
+    immediate_joiner: false,
+    flexibility_days: '',
   });
 
   // Application form state
