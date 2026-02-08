@@ -198,14 +198,27 @@ export default function HiringPortal() {
         </div>
 
         {user?.role === 'startup' && job.posted_by === user.id ? (
-          <Button
-            data-testid={`ai-match-job-${job.id}-button`}
-            onClick={() => window.location.href = `/candidate-matches/${job.id}`}
-            className="w-full rounded-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold flex items-center justify-center gap-2"
-          >
-            <Sparkles className="w-4 h-4" />
-            AI Match Candidates
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              data-testid={`set-preferences-${job.id}-button`}
+              onClick={() => {
+                setSelectedJobForPreferences(job);
+                setShowPreferencesForm(true);
+              }}
+              variant="outline"
+              className="flex-1 rounded-full border-2 border-purple-600 text-purple-600 hover:bg-purple-50 font-semibold"
+            >
+              Set AI Preferences
+            </Button>
+            <Button
+              data-testid={`ai-match-job-${job.id}-button`}
+              onClick={() => window.location.href = `/candidate-matches/${job.id}`}
+              className="flex-1 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold flex items-center justify-center gap-2"
+            >
+              <Sparkles className="w-4 h-4" />
+              View Matches
+            </Button>
+          </div>
         ) : user?.role !== 'startup' && (
           <Button
             data-testid={`apply-job-${job.id}-button`}
